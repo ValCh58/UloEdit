@@ -1,0 +1,32 @@
+<RCC>
+    <qresource prefix="/">
+        <file>../iconsFree/page.png</file>
+        <file>../iconsFree/page_edit.png</file>
+        <file>../iconsFree/page_save.png</file>
+        <file>../iconsFree/page_white_stack.png</file>
+        <file>../iconsFree/page_white_tux.png</file>
+        <file>../iconsFree/door_in.png</file>
+        <file>../iconsFree/table_refresh.png</file>
+        <file>../iconsFree/table_select.png</file>
+        <file>../iconsFree/table_multiple.png</file>
+        <file>../iconsFree/table_row_insert.png</file>
+        <file>../iconsFree/table_row_delete.png</file>
+        <file>../iconsFree/table_select_all.png</file>
+        <file>../iconsFree/table_replace.png</file>
+        <file>../iconsFree/find.png</file>
+        <file>../iconsFree/folder_find.png</file>
+        <file>../iconsFree/folder_search.png</file>
+        <file>../iconsFree/page_white.png</file>
+        <file>../iconsFree/page_find.png</file>
+        <file>../iconsFree/ask_and_answer.png</file>
+        <file>../iconsFree/page_gear.png</file>
+        <file>../iconsFree/application_lightning.png</file>
+        <file>../Icon/38_icon/tools folder.png</file>
+        <file>../Icon/qt.png</file>
+        <file>../iconsFree/table_select_row.png</file>
+        <file>../iconsFree/table_chart.png</file>
+        <file>../iconsFree/large_tiles.png</file>
+        <file>../iconsFree/node-tree.png</file>
+        <file>../iconsFree/recycle.png</file>
+    </qresource>
+</RCC>
