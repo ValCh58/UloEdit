@@ -18,13 +18,11 @@ Diagram::Diagram(QTableView *view, int firstRow, int cntRow, QWidget *parent) : 
 {
    View = view;
    setAttribute(Qt::WA_DeleteOnClose);
-   if(firstRow == -1){
-       //Message!!! Не выбрана запись в таблице!
-   }
+
    /** Обработка выделенных записей */
    if(cntRow > 1){
       processSelectRecords(firstRow, cntRow);
-   } else if(cntRow == 0){
+   } else if(cntRow == 1){
     /** Поиск связанных между собой записей алгоритма по одной выделенной строке в таблице */
         QModelIndex index = View->currentIndex();
         if(getFirstRow(index))
@@ -49,7 +47,7 @@ bool Diagram::processSelectRecords(int firstRow, int cntRow)
     bool retBool = false;
     int first = firstRow;
     /** Была ли выбрана строка в таблице */
-    if((View->currentIndex()).isValid()) {return false;}
+    if(!(View->currentIndex()).isValid()) {return false;}
     if(cntRow > 1){
        UloData dt = ((UloModelTable*)View->model())->getUloData(first);
        /** Если операция = INPUT */

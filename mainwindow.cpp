@@ -646,22 +646,47 @@ void MainWindow::createTabDiag()
          QSize size(520, 439);
          tdiag = new TabDiagram(this);
          tdiag->setWindowTitle("Схема алгоритма");
-         tdiag->getTabDiagram()->addTab(makeDiagram(view, &sz, title), QIcon(":/iconsFree/recycle.png"), *title);
+         Diagram *diag = makeDiagram(view, &sz, title);
+         if(chekCreateDiagram(diag, tdiag, title, view)){
+             return;
+         }
+         tdiag->getTabDiagram()->addTab(diag, QIcon(":/iconsFree/recycle.png"), *title);
          QSize mainSize = this->size();
          if((mainSize.width() - sz.width()) < 100){
             mainSize.setWidth(mainSize.width()+sz.width()*0.617);
             resize(mainSize);
          }
-         //mdiArea->addSubWindow(tdiag)->setMinimumSize(size);
          QRect rectView = view->geometry();
          mdiArea->addSubWindow(tdiag)->setGeometry(rectView.width()+53, rectView.y()-23, sz.width()*0.617, size.height());
          tdiag->show();
          this->setFocusProxy(tdiag);
      }else{
-         tdiag->getTabDiagram()->addTab(makeDiagram(view, &sz, title), QIcon(":/iconsFree/recycle.png"), *title);
-         /**Установим выбранную вкладку активной*/
+         Diagram *diag = makeDiagram(view, &sz, title);
+         if(chekCreateDiagram(diag, tdiag, title, view)){
+             return;
+         }
+         tdiag->getTabDiagram()->addTab(diag, QIcon(":/iconsFree/recycle.png"), *title);
+         /** Установим выбранную вкладку активной */
          tdiag->getTabDiagram()->setCurrentIndex(tdiag->getTabDiagram()->count()-1);
      }
+}
+
+/**
+ * Failure to create 'Diagram *diag'
+ * @brief MainWindow::chekCreateDiagram
+ * @param diag
+ * @return bool
+ */
+bool MainWindow::chekCreateDiagram(Diagram *diag, TabDiagram *tdiag, QString *title, QTableView *view){
+    bool retVal = false;
+    if(!diag){
+        if(tdiag){delete tdiag;}
+        if(title){delete title;}
+        if(view){delete view;}
+        QMessageBox::critical(this,"Ошибка", "Вкладка схемы не создана.", QMessageBox::Ok, 0 );
+        retVal = true;
+    }
+    return retVal;
 }
 
 /**
@@ -683,17 +708,22 @@ void MainWindow::delTabDiagram()
  */
 Diagram* MainWindow::makeDiagram(QTableView *view, QSize *sz, QString *strTitle)
 {
+    int firstRow = 0;
+    int numRow = -1;
+    Diagram *diagram = nullptr;
    /** Если строки алгоритма выбраны передадим их в конструктор */
    QItemSelectionModel *selectionModel = view->selectionModel();
    QModelIndexList selRow = selectionModel->selectedRows();
-   int firstRow = selRow.at(0).row();/** Номер первой выделенной строки */
-   int numRow   = selRow.size(); /* Кол. выделенных строк  */
+   firstRow = selRow.at(0).row();/** Номер первой выделенной строки */
+   numRow   = selRow.size(); /** Кол. выделенных строк  */
+   //numRow = 0;//!!!!!Debug!!!!!!!!//
+   if(firstRow >= 0 && numRow > 0){
+      diagram = new Diagram(view, firstRow, numRow,this);
+      diagram->parserItemAlgo(sz, strTitle);
+      diagram->printGroupAlgo();
+   }
 
-   Diagram *diag = new Diagram(view, firstRow, numRow,this);
-   diag->parserItemAlgo(sz, strTitle);
-   diag->printGroupAlgo();
-
-   return diag;
+   return diagram;
 }
 
 /** +++++++++++++++++++++Схема алгоритма++++++++++++++++++++ */
