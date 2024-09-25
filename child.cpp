@@ -214,7 +214,7 @@ void child::greateNewFile()
     setDataToModel(FCmd, MAX_CMD_COUNT);
 }
 
-//Копировать строку//
+//Копировать строку//!!!!!!!!!!!!!!!!!!!
 void child::CopyLineClick(){
    QItemSelectionModel *selectionModel = view->selectionModel();
    QModelIndexList selRow = selectionModel->selectedRows();

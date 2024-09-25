@@ -32,9 +32,12 @@ public:
 
     Q_ENUMS(ConductorSegmentType)
     enum ConductorSegmentType {
-        Horizontal = 1, // Horizontal segment
-        Vertical = 2,   // Vertical segment
-        Both = 3        // Наклонный segment
+        /** Horizontal segment */
+        Horizontal = 1,
+        /** Vertical segment */
+        Vertical = 2,
+        /** Наклонный segment */
+        Both = 3
     };
 
     Q_ENUMS (Direction)

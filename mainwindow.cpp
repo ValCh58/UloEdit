@@ -167,7 +167,7 @@ void MainWindow::createMenus(){
     editMenu->addAction(cancelAct);
     editMenu->addSeparator();
     editMenu->addAction(cutAct);
-    editMenu->addAction(copyAct);
+    editMenu->addAction(copy_Act);
     editMenu->addAction(replaceAct);
     editMenu->addAction(insAct);
     editMenu->addAction(delAct);
@@ -342,10 +342,11 @@ void MainWindow::createActionsEditMenu(){
     cutAct->setStatusTip("Вырезать");
     connect(cutAct, SIGNAL(triggered()), this, SLOT(cutLinesAndCopy()));
 
-    copyAct = new QAction(QIcon(":/iconsFree/table_multiple.png"),tr("Копировать"), this);
-    copyAct->setShortcuts(QKeySequence::Copy);
-    copyAct->setStatusTip("Копировать");
-    connect(copyAct, SIGNAL(triggered()), this, SLOT(copyRow()));
+    copy_Act = new QAction(QIcon(":/iconsFree/table_multiple.png"),tr("Копировать"), this);
+    //  copy_Act->setShortcuts(QKeySequence::Copy);//Не работает правильно!!!
+    copy_Act->setStatusTip("Копировать");
+    connect(copy_Act, &QAction::triggered, this, &MainWindow::copyRow);
+    //connect(copyAct, SIGNAL(triggered()), this, SLOT(copyRow()));
 
     replaceAct = new QAction(QIcon(":/iconsFree/table_replace.png"),tr("Заменить"), this);
     replaceAct->setShortcut(QKeySequence::Replace);
@@ -636,6 +637,7 @@ void MainWindow::nextFindCmpBck(){
  * @brief MainWindow::createTabDiag
  */
 void MainWindow::createTabDiag()
+
 {
      QTableView *view = ((child *)mdiArea->activeSubWindow()->widget())->getView();
      QSize sz;
@@ -660,7 +662,8 @@ void MainWindow::createTabDiag()
          mdiArea->addSubWindow(tdiag)->setGeometry(rectView.width()+53, rectView.y()-23, sz.width()*0.617, size.height());
          tdiag->show();
          this->setFocusProxy(tdiag);
-     }else{
+     }
+     else{
          Diagram *diag = makeDiagram(view, &sz, title);
          if(chekCreateDiagram(diag, tdiag, title, view)){
              return;
@@ -709,14 +712,13 @@ void MainWindow::delTabDiagram()
 Diagram* MainWindow::makeDiagram(QTableView *view, QSize *sz, QString *strTitle)
 {
     int firstRow = 0;
-    int numRow = -1;
+    int numRow = 0;
     Diagram *diagram = nullptr;
    /** Если строки алгоритма выбраны передадим их в конструктор */
    QItemSelectionModel *selectionModel = view->selectionModel();
    QModelIndexList selRow = selectionModel->selectedRows();
    firstRow = selRow.at(0).row();/** Номер первой выделенной строки */
    numRow   = selRow.size(); /** Кол. выделенных строк  */
-   //numRow = 0;//!!!!!Debug!!!!!!!!//
    if(firstRow >= 0 && numRow > 0){
       diagram = new Diagram(view, firstRow, numRow,this);
       diagram->parserItemAlgo(sz, strTitle);

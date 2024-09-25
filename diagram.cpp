@@ -1,7 +1,7 @@
-#include "diagram.h"
 
 #include <QDebug>
 
+#include "diagram.h"
 #include "schemealgo.h"
 #include "schemeview.h"
 #include "buildelements.h"
@@ -22,7 +22,7 @@ Diagram::Diagram(QTableView *view, int firstRow, int cntRow, QWidget *parent) : 
    /** Обработка выделенных записей */
    if(cntRow > 1){
       processSelectRecords(firstRow, cntRow);
-   } else if(cntRow == 1){
+   } else{
     /** Поиск связанных между собой записей алгоритма по одной выделенной строке в таблице */
         QModelIndex index = View->currentIndex();
         if(getFirstRow(index))
@@ -100,20 +100,30 @@ bool Diagram::getFirstRow(QModelIndex idx)
     return true;
 }
 
+/**
+ * @brief Diagram::getAllRows
+ * @param idx
+ */
 void Diagram::getAllRows(QModelIndex idx)
 {
     QModelIndex tmpIdx = idx;
     if((tmpIdx = getNextRow(tmpIdx, "5")).isValid()){
         if(getNextRow(tmpIdx, "6").isValid()){
-           delUndesiredRows();
+           delUndesiredRows(); /** Delete this a row from uloEdit */
         }
     }
 }
 
-/** Ищем последнюю операцию OUT в предыдущем блоке */
+/**
+ * Смотрим последнюю операцию в предыдущей записи,
+ * если недопустимая команда между INPUT и OUT - Ошибка.
+ * @brief Diagram::getPrevRow
+ * @param idx
+ * @return
+ */
 bool Diagram::getPrevRow(QModelIndex idx)
 {
-    bool ret = false;//Индекс неправильный//
+    bool ret = false;
 
     if(idx.isValid()){
        if(idx.row()>0){
@@ -127,18 +137,25 @@ bool Diagram::getPrevRow(QModelIndex idx)
              }else if(dat.getCodOper().indexOf("7")==0){//Прoчитан NOP, игнорируем//
                       continue;
              }else{
-                 ret =false;//Ошибка, недопустимая команда между INPUT и OUT//
-                 break;
+                 ret =false;/** Ошибка, недопустимая команда между INPUT и OUT */
+                 break; /** Индекс неправильный */
              }
           }
        }else{
-           ret = true;//Стоим на первой строке таблицы//
+           ret = true;/** Стоим на первой строке таблицы */
        }
     }
 
     return ret;
 }
 
+/**
+ * Go to next row
+ * @brief Diagram::getNextRow
+ * @param idx
+ * @param k_o
+ * @return
+ */
 QModelIndex Diagram::getNextRow(QModelIndex idx, QString k_o)
 {
     QModelIndex ret;
@@ -158,17 +175,19 @@ QModelIndex Diagram::getNextRow(QModelIndex idx, QString k_o)
              }
 
              UloData tmp = ((UloModelTable*)View->model())->getUloData(row-1);
-             if(!tmp.getCodOper().indexOf("7")==0)
+             if(!tmp.getCodOper().indexOf("7")==0){
                 datPrev = ((UloModelTable*)View->model())->getUloData(row-1);
+             }
 
-
-             if(dat.getCodOper().indexOf(k_o)==0){//Прочитан K.O.//
+             if(dat.getCodOper().indexOf(k_o)==0){/** Прочитан K.O. */
                 uloEdit.append(dat);
                 if(k_o.toInt()==5 && dat.getLogCellCommand().toInt()==0){//Найдем первый OUT//
                     ret = ((UloModelTable*)View->model())->index(row, 0);
                     break;
                 }
-                if(datPrev.getLogCellCommand().toInt()==0&&k_o.toInt()==6&&dat.getLogCellCommand().toInt()==1){//Найдем INPUT после OUT//
+                if(datPrev.getLogCellCommand().toInt()==0 &&
+                        k_o.toInt()==6 &&
+                                 dat.getLogCellCommand().toInt()==1){/** Найдем INPUT после OUT */
                    ret = ((UloModelTable*)View->model())->index(row, 0);
                    break;
                 }
@@ -184,7 +203,10 @@ QModelIndex Diagram::getNextRow(QModelIndex idx, QString k_o)
     return ret;
 }
 
-//Удалим последний INPUT для случая автоматического поиска конца алгоритма//
+/**
+ * Удалим последний INPUT для случая автоматического поиска конца алгоритма
+ * @brief Diagram::delUndesiredRows
+ */
 void Diagram::delUndesiredRows()
 {
   bool ok;
@@ -200,7 +222,12 @@ void Diagram::delUndesiredRows()
   }
 }
 
-/**Разбор элементов алгоритма*/
+/**
+ * Разбор элементов алгоритма
+ * @brief Diagram::parserItemAlgo
+ * @param sz
+ * @param title
+ */
 void Diagram::parserItemAlgo(QSize *sz, QString *title)
 {
    *title=uloEdit.at(0).getNumCommandHex()+"-"+uloEdit.last().getNumCommandHex();//Заголовок для вкладки//
@@ -244,7 +271,11 @@ void Diagram::parserItemAlgo(QSize *sz, QString *title)
    createScheme(sz);
 }
 
-//Создание таймера/БВРа//////////////////////////////////////////////////////////////////////////////////
+/**
+ * Создание таймера/БВРа
+ * @brief Diagram::processOut
+ * @param ud
+ */
 void Diagram::processOut(UloData ud)
 {
     bool ok;
@@ -260,6 +291,10 @@ void Diagram::processOut(UloData ud)
 
 }
 
+/**
+ * @brief Diagram::processTimer
+ * @param ud
+ */
 void Diagram::processTimer(UloData ud)
 {
     bool ok;
@@ -277,6 +312,10 @@ void Diagram::processTimer(UloData ud)
     addElementToMap(mapCnt, &tmp);
 }
 
+/**
+ * @brief Diagram::processBVR
+ * @param ud
+ */
 void Diagram::processBVR(UloData ud)
 {
     bool ok;
@@ -294,8 +333,10 @@ void Diagram::processBVR(UloData ud)
     addElementToMap(mapCnt, &tmp);
 }
 
-
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+/**
+ * @brief Diagram::processInput
+ * @param ud
+ */
 void Diagram::processInput(UloData ud)
 {
     bool ok;
@@ -328,7 +369,11 @@ void Diagram::processInput(UloData ud)
 }
 
 
-//Создадим AND элемент////////////////////////////////////////////
+/**
+ * Создадим AND элемент
+ * @brief Diagram::processAnd
+ * @param ud
+ */
 void Diagram::processAnd(UloData ud)
 {
      UloData dt = getPrevElement(&ud);
@@ -340,7 +385,11 @@ void Diagram::processAnd(UloData ud)
      isOutKo(&ud);
 }
 
-//Создадим OR элемент////////////////////////////////////////////
+/**
+ * Создадим OR элемент
+ * @brief Diagram::processOr
+ * @param ud
+ */
 void Diagram::processOr(UloData ud)
 {
     UloData dt = getPrevElement(&ud);
@@ -352,7 +401,11 @@ void Diagram::processOr(UloData ud)
     isOutKo(&ud);
 }
 
-//Универсальный элемент//////////////////////////////////////////////////////////////////
+/**
+ * Универсальный элемент
+ * @brief Diagram::processUni
+ * @param ud
+ */
 void Diagram::processUni(UloData ud)
 {
     UloData dt = getPrevElement(&ud);
@@ -368,8 +421,12 @@ void Diagram::processUni(UloData ud)
 
     processElemMap();
 
-}//------------------------------------------------------------------------------------//
+}
 
+/**
+ * @brief Diagram::processUni_E8
+ * @param ud
+ */
 void Diagram::processUni_E8(UloData ud)
 {
     UloData dt = getPrevElement(&ud);
@@ -382,7 +439,11 @@ void Diagram::processUni_E8(UloData ud)
     isOutKo(&ud);
 }
 
-//Построение компаратора равенства/неравенство/////////////////////////////////////////////
+/**
+ * Построение компаратора равенства/неравенство
+ * @brief Diagram::processUni_F9
+ * @param ud
+ */
 void Diagram::processUni_F9(UloData ud)
 {
     UloData dt = getPrevElement(&ud);
@@ -397,9 +458,10 @@ void Diagram::processUni_F9(UloData ud)
     processElemMap_F9();
 }
 
-//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-
-//Искать вход №3 и удалить его/////////////////////////////////////////////////////////////
+/**
+ * Искать вход №3 и удалить его
+ * @brief Diagram::processElemMap_F9
+ */
 void Diagram::processElemMap_F9()
 {
     QMap <int, QMap<int, UloData>>::Iterator iter = itemAlgo.end();
@@ -411,7 +473,7 @@ void Diagram::processElemMap_F9()
        return;
 
     QList<int> lKey(iter.value().keys());//Ключи подкарты элемента//
-    //Ищем Input 3 ////////////////////////////////////////
+    //Ищем Input 3 //
     for(int k : lKey){
         if(iter.value().value(k).getLogCellCommand() == "3"){
            iter.value().remove(k);
@@ -421,8 +483,10 @@ void Diagram::processElemMap_F9()
 
 }
 
-
-//Oбработкa карты элементов  QMap <int, QMap<int, UloData>> itemAlgo///////////////////////
+/**
+ * Oбработкa карты элементов  QMap <int, QMap<int, UloData>> itemAlgo
+ * @brief Diagram::processElemMap
+ */
 void Diagram::processElemMap()
 {
    QMap <int, QMap<int, UloData>>::Iterator mainIter = itemAlgo.end();
@@ -432,9 +496,12 @@ void Diagram::processElemMap()
    mapUniItemsInsDel(keysMap);//Откорректировать Л.Ф. = Е8!!!-???
 }
 
-
-
-//Поиск карты первого элемента UniElement//
+/**
+ * Поиск карты первого элемента UniElement
+ * @brief Diagram::searchUniItemsMap
+ * @param it
+ * @param l
+ */
 void Diagram::searchUniItemsMap(QMap <int, QMap<int, UloData>>::Iterator& it, QList<int> &l)
 {
     //Ищем начало элемента////////////////////////
@@ -447,8 +514,12 @@ void Diagram::searchUniItemsMap(QMap <int, QMap<int, UloData>>::Iterator& it, QL
     }
 }
 
-//Перекомпановка элементов путем их объединения//
-//Вставка в первую карту элемента и удаление карт из которых сделана вставка//
+/**
+ * Перекомпановка элементов путем их объединения
+ * Вставка в первую карту элемента и удаление карт из которых сделана вставка
+ * @brief Diagram::mapUniItemsInsDel
+ * @param l
+ */
 void Diagram::mapUniItemsInsDel(QList<int>& l)
 {
     int keyMap = 0;
@@ -463,9 +534,11 @@ void Diagram::mapUniItemsInsDel(QList<int>& l)
         itemAlgo.remove(l.at(sz));//Удалим подкарту из которой копировали данные//
     }
 }
-//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 
-//Не используется////////////////////////////////////////////////////!!!
+/**
+ * Не используется !!!
+ * @brief Diagram::correctUni
+ */
 void Diagram::correctUni()
 {
     int flagCell1=0,flagCell2=0, flagCell3=0;
@@ -488,9 +561,12 @@ void Diagram::correctUni()
               }
          }
      }
-}// !!!//////////////////////////////////////////////////////////////!!!
+}
 
-
+/**
+ * @brief Diagram::processUniTg
+ * @param ud
+ */
 void Diagram::processUniTg(UloData ud)
 {
      UloData dt = getPrevElement(&ud);
@@ -500,76 +576,115 @@ void Diagram::processUniTg(UloData ud)
      }
 }
 
-
+/**
+ * is trigger
+ * @brief Diagram::isTg
+ * @param operand
+ * @return
+ */
 bool Diagram::isTg(QString operand)
 {
-    bool retVal, ok;
+    bool retVal = false, ok;
 
      if(operand.toInt(&ok, 16)==0xB2 || operand.toInt(&ok, 16)==0xBA || operand.toInt(&ok, 16)==0x32)
+     {
         retVal = true;
-     else
-        retVal = false;
+     }
      return retVal;
 }
 
+/**
+ * Логическая функуция ?
+ * @brief Diagram::isLogFunc
+ * @param operand
+ * @return
+ */
 bool Diagram::isLogFunc(QString operand)
 {
-    bool retVal, ok;
+    bool retVal = false, ok;
 
-     if(operand.toInt(&ok, 16)==0xFE || operand.toInt(&ok, 16)==0xEE
-                                     || operand.toInt(&ok, 16)==0x80 || operand.toInt(&ok, 16)==0x88 )
-
-        retVal = true;
-     else
-        retVal = false;
+     if( operand.toInt(&ok, 16)==0xFE || operand.toInt(&ok, 16)==0xEE ||
+         operand.toInt(&ok, 16)==0x80 || operand.toInt(&ok, 16)==0x88 )
+     {
+         retVal = true;
+     }
      return retVal;
 }
 
+/**
+ * Логическая функуция E8 ?
+ * @brief Diagram::isLogFunc_E8
+ * @param operand
+ * @return
+ */
 bool Diagram::isLogFunc_E8(QString operand)
 {
-    bool retVal, ok;
+    bool retVal = false, ok;
 
      if(operand.toInt(&ok, 16) == 0xE8/*LF 2/3*/ )
-        retVal = true;
-     else
-        retVal = false;
+     {
+         retVal = true;
+     }
      return retVal;
 }
 
+/**
+ * Логическая функуция F9 ?
+ * @brief Diagram::isLogFunc_F9
+ * @param operand
+ * @return
+ */
 bool Diagram::isLogFunc_F9(QString operand)
 {
-    bool retVal, ok;
+    bool retVal = false, ok;
 
      if(operand.toInt(&ok, 16) == 0xF9 || operand.toInt(&ok, 16) == 0xF6)
+     {
         retVal = true;
-     else
-        retVal = false;
+     }
      return retVal;
 }
 
+/**
+ * Логическая функуция 99 ?
+ * @brief Diagram::isLogFunc_99
+ * @param operand
+ * @return
+ */
 bool Diagram::isLogFunc_99(QString operand)
 {
-    bool retVal, ok;
+    bool retVal = false, ok;
 
      if(operand.toInt(&ok, 16) == 0x99 || operand.toInt(&ok, 16) == 0x66)
-        retVal = true;
-     else
-        retVal = false;
+     {
+         retVal = true;
+     }
      return retVal;
 }
 
+/**
+ * Логическая функуция 41 ?
+ * @brief Diagram::isLogFunc_41
+ * @param operand
+ * @return
+ */
 bool Diagram::isLogFunc_41(QString operand)
 {
-    bool retVal, ok;
+    bool retVal = false, ok;
 
      if(operand.toInt(&ok, 16) == 0x41)
+     {
         retVal = true;
-     else
-        retVal = false;
+     }
      return retVal;
 }
 
-//Создать подкарту элементов////////////////////////////////////
+/**
+ * Создать подкарту элементов
+ * @brief Diagram::createMapElements
+ * @param d
+ * @return
+ */
 int Diagram::createMapElements(UloData *d)
 {
     bool ok;
@@ -580,8 +695,13 @@ int Diagram::createMapElements(UloData *d)
     return mapKey;
 }
 
-//Движение по элементам коллекции-----------------------------//
-//Получим предыдущий элемент////////////////////////////////////
+/**Движение по элементам коллекции-----------------------------*/
+/**
+ * Получим предыдущий элемент
+ * @brief Diagram::getPrevElement
+ * @param d
+ * @return
+ */
 UloData Diagram::getPrevElement(UloData *d)
 {
     bool ok;
@@ -595,7 +715,12 @@ UloData Diagram::getPrevElement(UloData *d)
     return dataRet;
 }
 
-//Получим следующий элемент//////////////////////////////////////
+/**
+ * Получим следующий элемент
+ * @brief Diagram::getNextElement
+ * @param d
+ * @return
+ */
 UloData Diagram::getNextElement(UloData *d)
 {
     bool ok;
@@ -608,9 +733,15 @@ UloData Diagram::getNextElement(UloData *d)
         }
 
     return dataRet;
-}//-----------------------------------------------------------//
+}
 
-//Сравнение КОД ОПЕР предыдущего и текущего элементов////////////////////////////////
+/**
+ * Сравнение КОД ОПЕР предыдущего и текущего элементов
+ * @brief Diagram::isKoEquKo
+ * @param curr
+ * @param prev
+ * @return
+ */
 bool Diagram::isKoEquKo(UloData *curr, UloData *prev)
 {
     bool ok;
@@ -619,7 +750,13 @@ bool Diagram::isKoEquKo(UloData *curr, UloData *prev)
     return false;
 }
 
-//Сравнение Л.Я. предыдущего и текущего элементов////////////////////////////////////
+/**
+ * Сравнение Л.Я. предыдущего и текущего элементов
+ * @brief Diagram::isLyEquLy
+ * @param curr
+ * @param prev
+ * @return
+ */
 bool Diagram::isLyEquLy(UloData *curr, UloData *prev)
 {
     if(!prev->getLogCellCommand().isEmpty() && !curr->getLogCellCommand().isEmpty())
@@ -627,7 +764,11 @@ bool Diagram::isLyEquLy(UloData *curr, UloData *prev)
     return false;
 }
 
-//Добавляем все OUT map элементов////////////////////////////////////
+/**
+ * Добавляем все OUT map элементов
+ * @brief Diagram::isOutKo
+ * @param d
+ */
 void Diagram::isOutKo(UloData *d)
 {
      UloData next = getNextElement(d);//Получим следующий элелемент//
@@ -639,25 +780,45 @@ void Diagram::isOutKo(UloData *d)
      }
 }
 
-//Элемент OR ?/////////////////////////////////////////////////////////////
+/**
+ * Элемент OR ?
+ * @brief Diagram::isElemOr
+ * @param d
+ * @return
+ */
 bool Diagram::isElemOr(UloData *d)
 {
     return d->getCodOper().toInt()==OR || d->getCodOper().toInt()==OR_N;
 }
 
-//Элемент AND ?////////////////////////////////////////////////////////////
+/**
+ * Элемент AND ?
+ * @brief Diagram::isElemAnd
+ * @param d
+ * @return
+ */
 bool Diagram::isElemAnd(UloData *d)
 {
     return d->getCodOper().toInt()==AND || d->getCodOper().toInt()==AND_N;
 }
 
-//Элемент INPUT ?//////////////////////////////////////////////////////////
+/**
+ * Элемент INPUT ?
+ * @brief Diagram::isElemInput
+ * @param d
+ * @return
+ */
 bool Diagram::isElemInput(UloData *d)
 {
     return d->getCodOper().toInt()==INP;
 }
 
-//Вставка элемента в подкарту/////////////////////////////////////////////////
+/**
+ * Вставка элемента в подкарту
+ * @brief Diagram::addElementToMap
+ * @param key
+ * @param d
+ */
 void Diagram::addElementToMap(int key, UloData *d)
 {
     bool ok;
@@ -666,6 +827,10 @@ void Diagram::addElementToMap(int key, UloData *d)
     i->insert(d->getNumCommandHex().toInt(&ok, 16),*d);//ВСтавка в подкарту//
 }
 
+/**
+ * Коррекция тригера
+ * @brief Diagram::correctTrig1
+ */
 void Diagram::correctTrig1()
 {
      int input1=0, input2=0;
@@ -707,7 +872,12 @@ void Diagram::correctTrig1()
      }
 }
 
-//Возврат типа триггера//////////////////////////////////////////////////
+/**
+ *  Возврат типа триггера
+ * @brief Diagram::isTrg
+ * @param comHex
+ * @return
+ */
 bool Diagram::isTrg(int comHex)
 {
     bool ret = true, ok;
@@ -755,7 +925,9 @@ void Diagram::createScheme(QSize *sz)
 
 }
 
-
+/**
+ * @brief Diagram::printGroupAlgo
+ */
 void Diagram::printGroupAlgo()
 {
     QMap <int, QMap<int, UloData>>::iterator it=itemAlgo.begin();

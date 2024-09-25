@@ -124,7 +124,7 @@ private:
     //menuEdit/////////
     QAction *cancelAct;
     QAction *cutAct;
-    QAction *copyAct;
+    QAction *copy_Act;
     QAction *replaceAct;
     QAction *insAct;
     QAction *delAct;
