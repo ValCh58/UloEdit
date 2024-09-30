@@ -146,7 +146,7 @@ private:
     TabDiagram *tdiag;
     bool tabOpen;
     Diagram *makeDiagram(QTableView *view, QSize *sz, QString *strTitle);
-    bool chekCreateDiagram(Diagram *diag, TabDiagram *tdiag, QString *title, QTableView *view);
+    bool chekCreateDiagram(Diagram *diag, TabDiagram *tdiag, QString *title);
 
 protected:
     virtual void closeEvent(QCloseEvent *e);

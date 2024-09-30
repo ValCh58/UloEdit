@@ -649,8 +649,8 @@ void MainWindow::createTabDiag()
          tdiag = new TabDiagram(this);
          tdiag->setWindowTitle("Схема алгоритма");
          Diagram *diag = makeDiagram(view, &sz, title);
-         if(chekCreateDiagram(diag, tdiag, title, view)){
-             return;
+         if(chekCreateDiagram(diag, tdiag, title)){
+            return;
          }
          tdiag->getTabDiagram()->addTab(diag, QIcon(":/iconsFree/recycle.png"), *title);
          QSize mainSize = this->size();
@@ -665,7 +665,7 @@ void MainWindow::createTabDiag()
      }
      else{
          Diagram *diag = makeDiagram(view, &sz, title);
-         if(chekCreateDiagram(diag, tdiag, title, view)){
+         if(chekCreateDiagram(diag, tdiag, title)){
              return;
          }
          tdiag->getTabDiagram()->addTab(diag, QIcon(":/iconsFree/recycle.png"), *title);
@@ -680,12 +680,12 @@ void MainWindow::createTabDiag()
  * @param diag
  * @return bool
  */
-bool MainWindow::chekCreateDiagram(Diagram *diag, TabDiagram *tdiag, QString *title, QTableView *view){
+bool MainWindow::chekCreateDiagram(Diagram *diag, TabDiagram *tdiag, QString *title/*, QTableView *view*/){
     bool retVal = false;
     if(!diag){
         if(tdiag){delete tdiag;}
         if(title){delete title;}
-        if(view){delete view;}
+        //if(view){delete view;}
         QMessageBox::critical(this,"Ошибка", "Вкладка схемы не создана.", QMessageBox::Ok, 0 );
         retVal = true;
     }
@@ -719,6 +719,12 @@ Diagram* MainWindow::makeDiagram(QTableView *view, QSize *sz, QString *strTitle)
    QModelIndexList selRow = selectionModel->selectedRows();
    firstRow = selRow.at(0).row();/** Номер первой выделенной строки */
    numRow   = selRow.size(); /** Кол. выделенных строк  */
+   /** Проверим выбор строки с операцией INPUT */
+   if(selRow.at(0).sibling(firstRow, 2).data().toInt() != INP)
+   {
+       QMessageBox::information(this,"Сообщение", "Выберить строку с операцией \"INPUT\".", QMessageBox::Ok, 0 );
+       return diagram;
+   }
    if(firstRow >= 0 && numRow > 0){
       diagram = new Diagram(view, firstRow, numRow,this);
       diagram->parserItemAlgo(sz, strTitle);

@@ -25,7 +25,7 @@ Diagram::Diagram(QTableView *view, int firstRow, int cntRow, QWidget *parent) : 
    } else{
     /** Поиск связанных между собой записей алгоритма по одной выделенной строке в таблице */
         QModelIndex index = View->currentIndex();
-        if(getFirstRow(index))
+        if(getFirstRow(index)) /** Проверим - что первая выбранная в алгоритме запись отмечена как INPUT. Шаг (1) */
            getAllRows(index);
    }
 }
@@ -51,14 +51,14 @@ bool Diagram::processSelectRecords(int firstRow, int cntRow)
     if(cntRow > 1){
        UloData dt = ((UloModelTable*)View->model())->getUloData(first);
        /** Если операция = INPUT */
-       if(dt.getCodOper().indexOf("6")==0){
+       if(dt.getCodOper().indexOf(INP_STR)==0){
           minIdx = dt.getNumCommandHex().toInt(&ok, 16);
           /** Заполним список QList<UloData> uloEdit данными */
           for(int i=0; i<cntRow; i++){
               UloData dat = ((UloModelTable*)View->model())->getUloData(first);
               first++;
               /** IF Прoчитан NOP, игнорируем */
-              if(dat.getCodOper().toInt()!=7)
+              if(dat.getCodOper().toInt() != NOP)
                  uloEdit << dat;
           }
           maxIdx = uloEdit.last().getNumCommandHex().toInt(&ok, 16);
@@ -87,7 +87,7 @@ bool Diagram::getFirstRow(QModelIndex idx)
     }else{
        return false;
     }
-    if(dt.getCodOper().indexOf("6")==0){
+    if(dt.getCodOper().indexOf(INP_STR)==0){
        if(getPrevRow(idx)){
           uloEdit.append(dt);
           minIdx = dt.getNumCommandHex().toInt(&ok, 16);
@@ -107,8 +107,8 @@ bool Diagram::getFirstRow(QModelIndex idx)
 void Diagram::getAllRows(QModelIndex idx)
 {
     QModelIndex tmpIdx = idx;
-    if((tmpIdx = getNextRow(tmpIdx, "5")).isValid()){
-        if(getNextRow(tmpIdx, "6").isValid()){
+    if((tmpIdx = getNextRow(tmpIdx, O_UT_STR)).isValid()){
+        if(getNextRow(tmpIdx, INP_STR).isValid()){
            delUndesiredRows(); /** Delete this a row from uloEdit */
         }
     }
@@ -131,10 +131,10 @@ bool Diagram::getPrevRow(QModelIndex idx)
           while(row >0){
              UloData dat = ((UloModelTable*)View->model())->getUloData(--row);
              /** IF Прочитан OUT */
-             if(dat.getCodOper().indexOf("5")==0){
+             if(dat.getCodOper().indexOf(O_UT_STR)==0){
                 ret = true;
                 break;
-             }else if(dat.getCodOper().indexOf("7")==0){//Прoчитан NOP, игнорируем//
+             }else if(dat.getCodOper().indexOf(NOP_STR)==0){/** Прoчитан NOP, игнорируем */
                       continue;
              }else{
                  ret =false;/** Ошибка, недопустимая команда между INPUT и OUT */
