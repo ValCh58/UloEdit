@@ -181,7 +181,7 @@ QModelIndex Diagram::getNextRow(QModelIndex idx, QString k_o)
 
              if(dat.getCodOper().indexOf(k_o)==0){/** Прочитан K.O. */
                 uloEdit.append(dat);
-                if(k_o.toInt()==5 && dat.getLogCellCommand().toInt()==0){//Найдем первый OUT//
+                if(k_o.toInt() == O_UT && dat.getLogCellCommand().toInt()==0){//Найдем первый OUT//
                     ret = ((UloModelTable*)View->model())->index(row, 0);
                     break;
                 }
