@@ -1,6 +1,12 @@
 #ifndef ULO
 #define ULO
 #include <QObject>
+
+/** Logical cell  */
+#define LY_1
+#define LY_2
+#define LY_3
+
 /** Elements */
 #define OR      0
 #define OR_STR "0"

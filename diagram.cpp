@@ -25,7 +25,9 @@ Diagram::Diagram(QTableView *view, int firstRow, int cntRow, QWidget *parent) : 
    } else{
     /** Поиск связанных между собой записей алгоритма по одной выделенной строке в таблице */
         QModelIndex index = View->currentIndex();
-        if(getFirstRow(index)) /** Проверим - что первая выбранная в алгоритме запись отмечена как INPUT. Шаг (1) */
+        if(getFirstRow(index)) /** Проверим - что первая выбранная в алгоритме запись отмечена как INPUT */
+
+          // func processGetAllRows(index)   сборка частей алгоритма //
            getAllRows(index);
    }
 }
@@ -92,24 +94,28 @@ bool Diagram::getFirstRow(QModelIndex idx)
           uloEdit.append(dt);
           minIdx = dt.getNumCommandHex().toInt(&ok, 16);
        }else{
+           /** Неправильный код операции перед INPUT */
            return false;
         }
     }else{
+       /** Выбраная строка не INPUT */
        return false;
     }
     return true;
 }
 
 /**
+ * Поиск строк от INPUT до OUT выбранной части алгоритма
  * @brief Diagram::getAllRows
  * @param idx
  */
 void Diagram::getAllRows(QModelIndex idx)
 {
     QModelIndex tmpIdx = idx;
-    if((tmpIdx = getNextRow(tmpIdx, O_UT_STR)).isValid()){
-        if(getNextRow(tmpIdx, INP_STR).isValid()){
-           delUndesiredRows(); /** Delete this a row from uloEdit */
+
+    if((tmpIdx = getNextRow(tmpIdx, O_UT_STR)).isValid()){ /** Проверим, что К.О. INPUT находится перед К.О. OUTPUT */
+        if(getNextRow(tmpIdx, INP_STR).isValid()){ /** Вносим строки из таблицы в список uloEdit от INPUT до крайнего OUT */
+           delUndesiredRows(); /** Delete this a row whis C.O. INPUT at uloEdit */
         }
     }
 }
@@ -126,9 +132,10 @@ bool Diagram::getPrevRow(QModelIndex idx)
     bool ret = false;
 
     if(idx.isValid()){
-       if(idx.row()>0){
+       if(idx.row() > 0){
           int row = idx.row();
-          while(row >0){
+          while(row > 0){
+             /** Делаем шаг назад, чтобы выяснить какая запись перед INPUT */
              UloData dat = ((UloModelTable*)View->model())->getUloData(--row);
              /** IF Прочитан OUT */
              if(dat.getCodOper().indexOf(O_UT_STR)==0){
@@ -138,7 +145,7 @@ bool Diagram::getPrevRow(QModelIndex idx)
                       continue;
              }else{
                  ret =false;/** Ошибка, недопустимая команда между INPUT и OUT */
-                 break; /** Индекс неправильный */
+                 break;
              }
           }
        }else{
@@ -166,7 +173,7 @@ QModelIndex Diagram::getNextRow(QModelIndex idx, QString k_o)
            int row = idx.row();
            while(row >=0 && row <= 0x7FFC){
              UloData dat = ((UloModelTable*)View->model())->getUloData(++row);
-             if(dat.getCodOper().indexOf("7")==0){
+             if(dat.getCodOper().indexOf(NOP_STR)==0){
                 if(row == 0x7FFC){
                    uloEdit.append(dat);
                    break;
@@ -175,24 +182,24 @@ QModelIndex Diagram::getNextRow(QModelIndex idx, QString k_o)
              }
 
              UloData tmp = ((UloModelTable*)View->model())->getUloData(row-1);
-             if(!tmp.getCodOper().indexOf("7")==0){
-                datPrev = ((UloModelTable*)View->model())->getUloData(row-1);
+             if(!tmp.getCodOper().indexOf(NOP_STR)==0){
+                datPrev = tmp;
              }
 
              if(dat.getCodOper().indexOf(k_o)==0){/** Прочитан K.O. */
                 uloEdit.append(dat);
-                if(k_o.toInt() == O_UT && dat.getLogCellCommand().toInt()==0){//Найдем первый OUT//
+                if(k_o.toInt() == O_UT && dat.getLogCellCommand().toInt()==0){//Найдем OUT//
                     ret = ((UloModelTable*)View->model())->index(row, 0);
                     break;
                 }
-                if(datPrev.getLogCellCommand().toInt()==0 &&
-                        k_o.toInt()==6 &&
-                                 dat.getLogCellCommand().toInt()==1){/** Найдем INPUT после OUT */
+                if(datPrev.getLogCellCommand().toInt() == 0 &&
+                                       k_o.toInt() == INP &&
+                                 dat.getLogCellCommand().toInt() == 1){/** Найдем INPUT после OUT */
                    ret = ((UloModelTable*)View->model())->index(row, 0);
                    break;
                 }
              }else{
-                if(!(dat.getCodOper().indexOf("7")==0)){
+                if(!(dat.getCodOper().indexOf(NOP_STR) == 0)){
                    uloEdit.append(dat);
                 }
              }
@@ -212,7 +219,7 @@ void Diagram::delUndesiredRows()
   bool ok;
 
   if(!uloEdit.isEmpty()){
-     if(uloEdit.last().getCodOper().toInt()==6 || uloEdit.last().getCodOper().toInt()==7)
+     if(uloEdit.last().getCodOper().toInt() == INP || uloEdit.last().getCodOper().toInt() == NOP)
         uloEdit.removeLast();
      maxIdx = uloEdit.last().getNumCommandHex().toInt(&ok, 16);
   }
@@ -417,7 +424,7 @@ void Diagram::processUni(UloData ud)
           //correctUni();
     }
     isOutKo(&ud);
-    //Вызов функции обработки карты элементов  QMap <int, QMap<int, UloData>> itemAlgo ЛФ{FE,EE,80,88}//
+    //Вызов функции обработки карты элементов  QMap <int, QMap<int, UloData>> itemAlgo ЛогФунк{FE,EE,80,88}//
 
     processElemMap();
 
