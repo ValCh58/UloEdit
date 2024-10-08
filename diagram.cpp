@@ -16,6 +16,7 @@
  */
 Diagram::Diagram(QTableView *view, int firstRow, int cntRow, QWidget *parent) : QWidget(parent)
 {
+   QList<UloData> jumpNextEl;
    View = view;
    setAttribute(Qt::WA_DeleteOnClose);
 
@@ -23,19 +24,60 @@ Diagram::Diagram(QTableView *view, int firstRow, int cntRow, QWidget *parent) : 
    if(cntRow > 1){
       processSelectRecords(firstRow, cntRow);
    } else{
-    /** Поиск связанных между собой записей алгоритма по одной выделенной строке в таблице */
+        /** Поиск связанных между собой записей алгоритма по одной выделенной строке в таблице */
         QModelIndex index = View->currentIndex();
-        if(getFirstRow(index)) /** Проверим - что первая выбранная в алгоритме запись отмечена как INPUT */
-
-          // func processGetAllRows(index)   сборка частей алгоритма //
-           getAllRows(index);
+        /** Проверим - что первая выбранная в алгоритме запись из таблицы INPUT */
+        if(getFirstRow(index)){
+          /** Cборка частей алгоритма */
+          getRelatedRecords(index, &jumpNextEl);
+        }
    }
+
 }
 
 /**
  * @brief Diagram::~Diagram
  */
 Diagram::~Diagram(){}
+
+
+void Diagram::getRelatedRecords(QModelIndex idx, QList<UloData> *jumpNextEl)
+{
+    /** Флаг проверки для К.О. INPUT и определение границ текущего элемента */
+    bool flagInput = true;
+    bool ok;
+
+    if(!idx.isValid()){return;} /** Недействительный индекс */
+    if(idx.row() > 0x7FFC){return;} /** Вне диапазона назначеных адресов */
+
+    for(int row = idx.row(); row >= 0 && row <= 0x7FFC; row++){
+        //qDebug("Row=%d", row);
+        /** Читаем строку таблицы в объект UloData */
+        UloData dat = ((UloModelTable*)View->model())->getUloData(row);
+        /** Сохраним ссылку на следующий элемент */
+        if((dat.getCodOper().indexOf(O_UT_STR)==0) && (dat.getOperandCommand().toInt(&ok, 16) < 0x400))
+        {
+            //int test = dat.getOperandCommand().toInt(&ok, 16);
+            *jumpNextEl << dat;
+        }
+        /** Условия пропуска пустой операции NOP */
+        if(dat.getCodOper().indexOf(NOP_STR)==0){ continue; }
+        if(dat.getCodOper().indexOf(INP_STR)==0){
+           /** false - первый INPUT текущего элемента. true - INPUT следующего элемента элемента. */
+            flagInput = !flagInput;
+            if(flagInput){ break; } //Окончание текущего элемента.
+        }
+        uloEdit.append(dat);
+        maxIdx = uloEdit.last().getNumCommandHex().toInt(&ok, 16);
+       }
+
+    /**Для отладки!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
+    foreach(UloData ue, uloEdit){
+        qDebug()<<"K.O. "<<ue.getCodOper()<<"ЛЯ "<<ue.getLogCellCommand()<<" Operation "<<ue.getOperCommand();
+    }
+
+}
+
 
 /**
  * @brief Diagram::processSeltctRecords
@@ -75,6 +117,7 @@ bool Diagram::processSelectRecords(int firstRow, int cntRow)
 }
 
 /**
+ * Чтение первой записи с кодом операции INPUT
  * @brief Diagram::getFirstRow
  * @param QModelIndex idx индекс в таблице
  * @return
@@ -86,22 +129,12 @@ bool Diagram::getFirstRow(QModelIndex idx)
 
     if(idx.isValid()){
        dt = ((UloModelTable*)View->model())->getUloData(idx.row());
+       minIdx = dt.getNumCommandHex().toInt(&ok, 16);
     }else{
        return false;
     }
-    if(dt.getCodOper().indexOf(INP_STR)==0){
-       if(getPrevRow(idx)){
-          uloEdit.append(dt);
-          minIdx = dt.getNumCommandHex().toInt(&ok, 16);
-       }else{
-           /** Неправильный код операции перед INPUT */
-           return false;
-        }
-    }else{
-       /** Выбраная строка не INPUT */
-       return false;
-    }
-    return true;
+
+    return (dt.getCodOper().indexOf(INP_STR)==0 && getPrevRow(idx)) ? true : false;
 }
 
 /**
@@ -109,12 +142,12 @@ bool Diagram::getFirstRow(QModelIndex idx)
  * @brief Diagram::getAllRows
  * @param idx
  */
-void Diagram::getAllRows(QModelIndex idx)
+void Diagram::getAllRows(QModelIndex idx, QList<UloData> *coUlo)
 {
     QModelIndex tmpIdx = idx;
 
-    if((tmpIdx = getNextRow(tmpIdx, O_UT_STR)).isValid()){ /** Проверим, что К.О. INPUT находится перед К.О. OUTPUT */
-        if(getNextRow(tmpIdx, INP_STR).isValid()){ /** Вносим строки из таблицы в список uloEdit от INPUT до крайнего OUT */
+    if((tmpIdx = getNextRow(tmpIdx, O_UT_STR, coUlo)).isValid()){ /** Проверим, что К.О. INPUT находится после К.О. OUTPUT */
+        if(getNextRow(tmpIdx, INP_STR, coUlo).isValid()){ /** Вносим строки из таблицы в список uloEdit от INPUT до крайнего OUT */
            delUndesiredRows(); /** Delete this a row whis C.O. INPUT at uloEdit */
         }
     }
@@ -163,7 +196,7 @@ bool Diagram::getPrevRow(QModelIndex idx)
  * @param k_o
  * @return
  */
-QModelIndex Diagram::getNextRow(QModelIndex idx, QString k_o)
+QModelIndex Diagram::getNextRow(QModelIndex idx, QString k_o, QList<UloData> *coUlo)
 {
     QModelIndex ret;
     UloData datPrev;
@@ -188,8 +221,9 @@ QModelIndex Diagram::getNextRow(QModelIndex idx, QString k_o)
 
              if(dat.getCodOper().indexOf(k_o)==0){/** Прочитан K.O. */
                 uloEdit.append(dat);
-                if(k_o.toInt() == O_UT && dat.getLogCellCommand().toInt()==0){//Найдем OUT//
+                if(k_o.toInt() == O_UT && dat.getLogCellCommand().toInt()==0){/** Найдем OUT */
                     ret = ((UloModelTable*)View->model())->index(row, 0);
+                    coUlo->append(dat);
                     break;
                 }
                 if(datPrev.getLogCellCommand().toInt() == 0 &&
@@ -243,7 +277,7 @@ void Diagram::parserItemAlgo(QSize *sz, QString *title)
 
        switch(d.getCodOper().toInt()){
        case O_UT://5
-            processOut(d);//Создание таймера//
+            processOut(d);
            break;
        case INP://6
             processInput(d);//Обработка INPUT всех элементов//

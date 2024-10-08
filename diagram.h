@@ -33,10 +33,11 @@ private:
     QList<UloData> uloEdit;
     UloData beginRow;
     int cntRows;
+    void getRelatedRecords(QModelIndex idx, QList<UloData> *jumpNextEl);
     bool getFirstRow(QModelIndex idx);
-    void getAllRows(QModelIndex idx);
+    void getAllRows(QModelIndex idx, QList<UloData> *coUlo);
     bool getPrevRow(QModelIndex idx);
-    QModelIndex getNextRow(QModelIndex idx, QString k_o);
+    QModelIndex getNextRow(QModelIndex idx, QString k_o, QList<UloData> *coUlo);
     void delUndesiredRows();
     /** Элементы алгоритма (строки из файла) */
     QMap <int, QMap<int, UloData>> itemAlgo;
