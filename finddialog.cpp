@@ -63,9 +63,10 @@ int FindDialog::createCycleFind(int idx, int cell, long strToHex)
 {
     int flagOk = 0;
     bool ok;
-    ch->setDisConn();//Временно отключим сигнал//
+    /**Временно отключим сигнал*/
+    ch->setDisConn();
     QItemSelectionModel *selectionModel = ch->getView()->selectionModel();
-    //Найдем совпадение в  таблицe//
+    /**Найдем совпадение в  таблицe*/
     for(int i = idx; i < MAX_CMD_COUNT; i++){
         QModelIndex commandIndex0 = ch->getUloModelTable()->index(i, cell, QModelIndex());
         QString fromTable = commandIndex0.data().toString();
@@ -94,7 +95,7 @@ void FindDialog::setSelectRow(QItemSelectionModel *selectionMod, QModelIndex com
 void FindDialog::clearSelectedRows()
 {
     QItemSelectionModel *selectionModel = ch->getView()->selectionModel();
-    //Если есть выделенные строки в таблице - очистим их//
+    /**Если есть выделенные строки в таблице - очистим их*/
     QModelIndexList indexes = selectionModel->selectedIndexes();
     if(indexes.size() != 0){
        foreach(QModelIndex im, indexes){
@@ -151,7 +152,7 @@ void FindOperDialog::nextFind()
     int i = ch->getIx()+1;
     //bool ok;
     int result = 0;
-ch->setDisConn();
+    ch->setDisConn();
     long strToHex = ch->getValNext();
     this->clearSelectedRows();
     result = this->createCycleFind(i, 4, strToHex);
@@ -164,14 +165,14 @@ ch->setDisConn();
     ch->setIx(result);
     ch->setFocus();
     ch->update();
-ch->setConn();
+    ch->setConn();
 }
 
 void FindOperDialog::findClicked()
 {
     bool ok;
     int result = 0;
-ch->setDisConn();
+    ch->setDisConn();
     long strToHex = this->getFindText().toLong(&ok, 16);
     this->clearSelectedRows();
     result = this->createCycleFind(0, 4, strToHex);
@@ -180,7 +181,7 @@ ch->setDisConn();
     }
     ch->setIx(result);
     ch->setValNext(strToHex);
-ch->setConn();
+    ch->setConn();
 }
 
 

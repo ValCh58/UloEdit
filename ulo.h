@@ -2,6 +2,8 @@
 #define ULO
 #include <QObject>
 
+#define MAX_ROWS 0x7FFC
+
 /** Logical cell  */
 #define LY_1
 #define LY_2

@@ -81,6 +81,7 @@ private:
     int maxIdx;
     void createScheme(QSize *sz);
     bool processSelectRecords(int firstRow = -1, int cntRow = 0);
+    void clearSelectedRows(); //add 09-10-2024//
 
 signals:
 

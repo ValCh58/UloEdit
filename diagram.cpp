@@ -40,7 +40,51 @@ Diagram::Diagram(QTableView *view, int firstRow, int cntRow, QWidget *parent) : 
  */
 Diagram::~Diagram(){}
 
+/**
+ * Cleaning only selected rows
+ * @brief Diagram::clearSelectedRows
+ */
+void Diagram::clearSelectedRows()
+{
+    QModelIndexList indexces = View->selectionModel()->selectedIndexes();
+    if(indexces.size() > 0){
+       foreach(QModelIndex idxMod, indexces){
+               View->selectionModel()->setCurrentIndex(idxMod, QItemSelectionModel::Deselect);
+       }
+    }
+}
 
+//09-10-2024//
+//int FindDialog::createCycleFind(int idx, int cell, long strToHex)
+//{
+//    int flagOk = 0;
+//    bool ok;
+//    /**Временно отключим сигнал*/
+//    ch->setDisConn();
+//    QItemSelectionModel *selectionModel = ch->getView()->selectionModel();
+//    /**Найдем совпадение в  таблицe*/
+//    for(int i = idx; i < MAX_CMD_COUNT; i++){
+//        QModelIndex commandIndex0 = ch->getUloModelTable()->index(i, cell, QModelIndex());
+//        QString fromTable = commandIndex0.data().toString();
+//        if(fromTable.toLong(&ok, 16) == strToHex){
+//            setSelectRow(selectionModel, commandIndex0, i);
+//            flagOk = commandIndex0.row();
+//            ch->setLastRowOk(i);
+//            break;
+//        }
+//    }
+//    QModelIndex commandIndex0 = ch->getUloModelTable()->index(flagOk, cell, QModelIndex());
+//    setSelectRow(selectionModel, commandIndex0, flagOk);
+//    ch->setConn();//Включим//
+//    return flagOk;
+//}
+
+/**
+ *
+ * @brief Diagram::getRelatedRecords
+ * @param idx
+ * @param jumpNextEl
+ */
 void Diagram::getRelatedRecords(QModelIndex idx, QList<UloData> *jumpNextEl)
 {
     /** Флаг проверки для К.О. INPUT и определение границ текущего элемента */
@@ -48,22 +92,25 @@ void Diagram::getRelatedRecords(QModelIndex idx, QList<UloData> *jumpNextEl)
     bool ok;
 
     if(!idx.isValid()){return;} /** Недействительный индекс */
-    if(idx.row() > 0x7FFC){return;} /** Вне диапазона назначеных адресов */
+    if(idx.row() > MAX_ROWS){return;} /** Вне диапазона назначеных адресов */
 
-    for(int row = idx.row(); row >= 0 && row <= 0x7FFC; row++){
+    for(int row = idx.row(); row >= 0 && row <= MAX_ROWS; row++){
         //qDebug("Row=%d", row);
         /** Читаем строку таблицы в объект UloData */
         UloData dat = ((UloModelTable*)View->model())->getUloData(row);
         /** Сохраним ссылку на следующий элемент */
-        if((dat.getCodOper().indexOf(O_UT_STR)==0) && (dat.getOperandCommand().toInt(&ok, 16) < 0x400))
-        {
-            //int test = dat.getOperandCommand().toInt(&ok, 16);
+        if((dat.getCodOper().indexOf(O_UT_STR)==0)
+                   && (dat.getOperandCommand().toInt(&ok, 16) < 0x400))
+        {            
+            int operandCommand = dat.getOperandCommand().toInt(&ok, 16);
+            clearSelectedRows();
             *jumpNextEl << dat;
+
         }
         /** Условия пропуска пустой операции NOP */
         if(dat.getCodOper().indexOf(NOP_STR)==0){ continue; }
         if(dat.getCodOper().indexOf(INP_STR)==0){
-           /** false - первый INPUT текущего элемента. true - INPUT следующего элемента элемента. */
+           /** false - первый INPUT текущего элемента. true - INPUT следующего элемента. */
             flagInput = !flagInput;
             if(flagInput){ break; } //Окончание текущего элемента.
         }
@@ -72,9 +119,16 @@ void Diagram::getRelatedRecords(QModelIndex idx, QList<UloData> *jumpNextEl)
        }
 
     /**Для отладки!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
+    qDebug()<<"\n";
     foreach(UloData ue, uloEdit){
-        qDebug()<<"K.O. "<<ue.getCodOper()<<"ЛЯ "<<ue.getLogCellCommand()<<" Operation "<<ue.getOperCommand();
+            qDebug()<<" K.O. "<<ue.getCodOper()<<" ЛЯ "<<ue.getLogCellCommand()<<" Operation "<<ue.getOperCommand();
     }
+    qDebug()<<"\n";
+    foreach(UloData je, *jumpNextEl){
+        qDebug()<<je.getNumCommandHex()<<" "<<je.getCodHex()<<" "<<je.getCodOper()<<" "<<je.getLogCellCommand()
+                <<" "<<je.getOperandCommand()<<" "<<je.getOperCommand();
+    }
+    qDebug()<<"\n";
 
 }
 
