@@ -54,30 +54,32 @@ void Diagram::clearSelectedRows()
     }
 }
 
-//09-10-2024//
-//int FindDialog::createCycleFind(int idx, int cell, long strToHex)
-//{
-//    int flagOk = 0;
-//    bool ok;
-//    /**Временно отключим сигнал*/
-//    ch->setDisConn();
-//    QItemSelectionModel *selectionModel = ch->getView()->selectionModel();
-//    /**Найдем совпадение в  таблицe*/
-//    for(int i = idx; i < MAX_CMD_COUNT; i++){
-//        QModelIndex commandIndex0 = ch->getUloModelTable()->index(i, cell, QModelIndex());
-//        QString fromTable = commandIndex0.data().toString();
-//        if(fromTable.toLong(&ok, 16) == strToHex){
-//            setSelectRow(selectionModel, commandIndex0, i);
-//            flagOk = commandIndex0.row();
-//            ch->setLastRowOk(i);
-//            break;
-//        }
-//    }
-//    QModelIndex commandIndex0 = ch->getUloModelTable()->index(flagOk, cell, QModelIndex());
-//    setSelectRow(selectionModel, commandIndex0, flagOk);
-//    ch->setConn();//Включим//
-//    return flagOk;
-//}
+/**
+ * Find of operand
+ * @brief Diagram::findModIndex
+ * @param operand
+ * @param cell4
+ * @param codeHex
+ * @param cell0
+ * @return
+ */
+QModelIndex Diagram::findModIndex(QString operand, int cell4, QString codeHex, int cell0){
+    bool ok;
+    QModelIndex indexOperand;
+    QAbstractItemModel *myModel = View->model();
+
+    for(int i = 0; i < MAX_ROWS; i++){
+        indexOperand = myModel->index(i, cell4, QModelIndex());
+        QModelIndex indexCodeHex = myModel->index(i, cell0, QModelIndex());
+        QString strOperand = indexOperand.data().toString();
+        QString strCodeHex = indexCodeHex.data().toString();
+        if(strOperand.toInt(&ok, 16) == operand.toInt(&ok, 16) && strCodeHex.toInt(&ok, 16) != codeHex.toInt(&ok, 16)){
+           View->selectionModel()->setCurrentIndex(indexOperand, QItemSelectionModel::Select);
+           break;
+        }
+    }
+    return indexOperand;
+}
 
 /**
  *
@@ -102,9 +104,9 @@ void Diagram::getRelatedRecords(QModelIndex idx, QList<UloData> *jumpNextEl)
         if((dat.getCodOper().indexOf(O_UT_STR)==0)
                    && (dat.getOperandCommand().toInt(&ok, 16) < 0x400))
         {            
-            int operandCommand = dat.getOperandCommand().toInt(&ok, 16);
             clearSelectedRows();
             *jumpNextEl << dat;
+            findModIndex(dat.getOperandCommand(), 4, dat.getNumCommandHex(), 0);
 
         }
         /** Условия пропуска пустой операции NOP */

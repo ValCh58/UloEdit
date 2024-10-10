@@ -27,6 +27,7 @@ public:
     void parserItemAlgo(QSize *sz, QString *title);
     void printGroupAlgo();
 
+
 private:
     QTableView *View;
     /** Записи алгоритма */
@@ -82,6 +83,7 @@ private:
     void createScheme(QSize *sz);
     bool processSelectRecords(int firstRow = -1, int cntRow = 0);
     void clearSelectedRows(); //add 09-10-2024//
+    QModelIndex findModIndex(QString operand, int cell4, QString codeHex, int cell0); //add 10-10-2024//
 
 signals:
 
