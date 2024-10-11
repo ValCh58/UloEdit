@@ -47,7 +47,7 @@ Diagram::~Diagram(){}
 void Diagram::clearSelectedRows()
 {
     QModelIndexList indexces = View->selectionModel()->selectedIndexes();
-    if(indexces.size() > 0){
+    if(indexces.size() >= 0){
        foreach(QModelIndex idxMod, indexces){
                View->selectionModel()->setCurrentIndex(idxMod, QItemSelectionModel::Deselect);
        }
@@ -67,19 +67,39 @@ QModelIndex Diagram::findModIndex(QString operand, int cell4, QString codeHex, i
     bool ok;
     QModelIndex indexOperand;
     QAbstractItemModel *myModel = View->model();
+    QItemSelectionModel *mySelection = View->selectionModel();
 
+    clearSelectedRows();
     for(int i = 0; i < MAX_ROWS; i++){
         indexOperand = myModel->index(i, cell4, QModelIndex());
         QModelIndex indexCodeHex = myModel->index(i, cell0, QModelIndex());
-        QString strOperand = indexOperand.data().toString();
-        QString strCodeHex = indexCodeHex.data().toString();
-        if(strOperand.toInt(&ok, 16) == operand.toInt(&ok, 16) && strCodeHex.toInt(&ok, 16) != codeHex.toInt(&ok, 16)){
-           View->selectionModel()->setCurrentIndex(indexOperand, QItemSelectionModel::Select);
+        int strOperand = indexOperand.data().toInt();
+        int strCodeHex = indexCodeHex.data().toInt();
+        if(strOperand == operand.toInt(&ok, 10) && strCodeHex != codeHex.toInt(&ok, 10)){
+           setSelectRow(mySelection, myModel, indexOperand, indexOperand.row());
            break;
         }
     }
     return indexOperand;
 }
+
+
+/**
+ * Select row
+ * @brief Diagram::setSelectRow
+ * @param selectionMod
+ * @param myModel
+ * @param commandInd
+ * @param row
+ */
+void Diagram::setSelectRow(QItemSelectionModel *selectionMod, QAbstractItemModel *myModel, QModelIndex commandInd, int row){
+    selectionMod->setCurrentIndex(commandInd, QItemSelectionModel::Select);
+    QModelIndex left = myModel->index(row, 0, QModelIndex());
+    QModelIndex right = myModel->index(row, 5, QModelIndex());
+    QItemSelection selection(left, right);
+    selectionMod->select(selection, QItemSelectionModel::Select);
+}
+
 
 /**
  *
@@ -95,44 +115,51 @@ void Diagram::getRelatedRecords(QModelIndex idx, QList<UloData> *jumpNextEl)
 
     if(!idx.isValid()){return;} /** Недействительный индекс */
     if(idx.row() > MAX_ROWS){return;} /** Вне диапазона назначеных адресов */
+    QAbstractItemModel *myModel = View->model();
+    QItemSelectionModel *mySelection = View->selectionModel();
+    QModelIndex indexOperand;
 
     for(int row = idx.row(); row >= 0 && row <= MAX_ROWS; row++){
-        //qDebug("Row=%d", row);
+        indexOperand = myModel->index(row, 4, QModelIndex());
+        setSelectRow(mySelection, myModel, indexOperand, row);
         /** Читаем строку таблицы в объект UloData */
         UloData dat = ((UloModelTable*)View->model())->getUloData(row);
         /** Сохраним ссылку на следующий элемент */
-        if((dat.getCodOper().indexOf(O_UT_STR)==0)
-                   && (dat.getOperandCommand().toInt(&ok, 16) < 0x400))
+        if((dat.getCodOper().indexOf(O_UT_STR)==0) && (dat.getOperandCommand().toInt(&ok, 16) < 0x400))
         {            
-            clearSelectedRows();
             *jumpNextEl << dat;
-            findModIndex(dat.getOperandCommand(), 4, dat.getNumCommandHex(), 0);
+            //findModIndex(dat.getOperandCommand(), 4, dat.getNumCommandHex(), 0);
 
         }
         /** Условия пропуска пустой операции NOP */
         if(dat.getCodOper().indexOf(NOP_STR)==0){ continue; }
-        if(dat.getCodOper().indexOf(INP_STR)==0){
-           /** false - первый INPUT текущего элемента. true - INPUT следующего элемента. */
-            flagInput = !flagInput;
-            if(flagInput){ break; } //Окончание текущего элемента.
+
+        if(dat.getCodOper().indexOf(INP_STR)==0){// && flagInput){
+            flagInput = !flagInput; /** true - первый INPUT текущего элемента. */
         }
+        else if(flagInput){// && getPrevRow(indexOperand)){
+                break;
+             } //Окончание текущего элемента./
+
         uloEdit.append(dat);
         maxIdx = uloEdit.last().getNumCommandHex().toInt(&ok, 16);
        }
 
-    /**Для отладки!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
-    qDebug()<<"\n";
-    foreach(UloData ue, uloEdit){
-            qDebug()<<" K.O. "<<ue.getCodOper()<<" ЛЯ "<<ue.getLogCellCommand()<<" Operation "<<ue.getOperCommand();
-    }
-    qDebug()<<"\n";
-    foreach(UloData je, *jumpNextEl){
-        qDebug()<<je.getNumCommandHex()<<" "<<je.getCodHex()<<" "<<je.getCodOper()<<" "<<je.getLogCellCommand()
-                <<" "<<je.getOperandCommand()<<" "<<je.getOperCommand();
-    }
-    qDebug()<<"\n";
-
 }
+
+
+//    /**Для отладки!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
+//    qDebug()<<"\n";
+//    foreach(UloData ue, uloEdit){
+//            qDebug()<<" K.O. "<<ue.getCodOper()<<" ЛЯ "<<ue.getLogCellCommand()<<" Operation "<<ue.getOperCommand();
+//    }
+//    qDebug()<<"\n";
+//    foreach(UloData je, *jumpNextEl){
+//        qDebug()<<je.getNumCommandHex()<<" "<<je.getCodHex()<<" "<<je.getCodOper()<<" "<<je.getLogCellCommand()
+//                <<" "<<je.getOperandCommand()<<" "<<je.getOperCommand();
+//    }
+//    qDebug()<<"\n";
+
 
 
 /**

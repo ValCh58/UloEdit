@@ -84,6 +84,7 @@ private:
     bool processSelectRecords(int firstRow = -1, int cntRow = 0);
     void clearSelectedRows(); //add 09-10-2024//
     QModelIndex findModIndex(QString operand, int cell4, QString codeHex, int cell0); //add 10-10-2024//
+    void setSelectRow(QItemSelectionModel *selectionMod, QAbstractItemModel *myModel, QModelIndex commandInd, int row);
 
 signals:
 
