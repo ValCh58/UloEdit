@@ -16,21 +16,23 @@
  */
 Diagram::Diagram(QTableView *view, int firstRow, int cntRow, QWidget *parent) : QWidget(parent)
 {
-   QList<UloData> jumpNextEl;
+   QList<QModelIndex> jumpNextEl;
    View = view;
    setAttribute(Qt::WA_DeleteOnClose);
 
    /** Обработка выделенных записей */
    if(cntRow > 1){
       processSelectRecords(firstRow, cntRow);
-   } else{
-        /** Поиск связанных между собой записей алгоритма по одной выделенной строке в таблице */
-        QModelIndex index = View->currentIndex();
-        /** Проверим - что первая выбранная в алгоритме запись из таблицы INPUT */
-        if(getFirstRow(index)){
-          /** Cборка частей алгоритма */
-          getRelatedRecords(index, &jumpNextEl);
-        }
+   } else{/** Поиск связанных между собой записей алгоритма по одной выделенной строке в таблице */
+       int i = 0;
+       QModelIndex index = View->currentIndex();
+          jumpNextEl.append(index);
+          while(jumpNextEl.size() != i) {
+              if(getFirstRow(jumpNextEl.at(i))){ /** Проверим - что первая выбранная в алгоритме запись из таблицы INPUT */
+                   getRelatedRecords(jumpNextEl.at(i), &jumpNextEl); /** Cборка частей алгоритма */
+              }
+              i++;
+       }
    }
 
 }
@@ -69,13 +71,13 @@ QModelIndex Diagram::findModIndex(QString operand, int cell4, QString codeHex, i
     QAbstractItemModel *myModel = View->model();
     QItemSelectionModel *mySelection = View->selectionModel();
 
-    clearSelectedRows();
+    //clearSelectedRows();
     for(int i = 0; i < MAX_ROWS; i++){
         indexOperand = myModel->index(i, cell4, QModelIndex());
         QModelIndex indexCodeHex = myModel->index(i, cell0, QModelIndex());
-        int strOperand = indexOperand.data().toInt();
-        int strCodeHex = indexCodeHex.data().toInt();
-        if(strOperand == operand.toInt(&ok, 10) && strCodeHex != codeHex.toInt(&ok, 10)){
+        int intOperand = indexOperand.data().toInt();
+        int intCodeHex = indexCodeHex.data().toInt();
+        if(intOperand == operand.toInt(&ok, 10) && intCodeHex != codeHex.toInt(&ok, 10)){
            setSelectRow(mySelection, myModel, indexOperand, indexOperand.row());
            break;
         }
@@ -102,12 +104,12 @@ void Diagram::setSelectRow(QItemSelectionModel *selectionMod, QAbstractItemModel
 
 
 /**
- *
+ * Построение одного элемента от INPUT до OUT
  * @brief Diagram::getRelatedRecords
  * @param idx
  * @param jumpNextEl
  */
-void Diagram::getRelatedRecords(QModelIndex idx, QList<UloData> *jumpNextEl)
+void Diagram::getRelatedRecords(QModelIndex idx, QList<QModelIndex> *jumpNextEl)
 {
     /** Флаг проверки для К.О. INPUT и определение границ текущего элемента */
     bool flagInput = true;
@@ -121,30 +123,30 @@ void Diagram::getRelatedRecords(QModelIndex idx, QList<UloData> *jumpNextEl)
 
     for(int row = idx.row(); row >= 0 && row <= MAX_ROWS; row++){
         indexOperand = myModel->index(row, 4, QModelIndex());
-        setSelectRow(mySelection, myModel, indexOperand, row);
         /** Читаем строку таблицы в объект UloData */
         UloData dat = ((UloModelTable*)View->model())->getUloData(row);
         /** Сохраним ссылку на следующий элемент */
         if((dat.getCodOper().indexOf(O_UT_STR)==0) && (dat.getOperandCommand().toInt(&ok, 16) < 0x400))
         {            
-            *jumpNextEl << dat;
-            //findModIndex(dat.getOperandCommand(), 4, dat.getNumCommandHex(), 0);
+            *jumpNextEl << findModIndex(dat.getOperandCommand(), 4, dat.getNumCommandHex(), 0);
 
         }
         /** Условия пропуска пустой операции NOP */
         if(dat.getCodOper().indexOf(NOP_STR)==0){ continue; }
 
-        if(dat.getCodOper().indexOf(INP_STR)==0){// && flagInput){
-            flagInput = !flagInput; /** true - первый INPUT текущего элемента. */
+        if(dat.getCodOper().indexOf(INP_STR)==0 && flagInput){
+            flagInput = !flagInput; /** true - первый INPUT текущего элемента. Отметим начальный INPUT */
         }
-        else if(flagInput){// && getPrevRow(indexOperand)){
-                break;
-             } //Окончание текущего элемента./
-
+        else if(dat.getCodOper().indexOf(INP_STR)==0 && /** Обработка следующих INPUT */
+                            getPrevRow(indexOperand) && /** Проверим - не является ли текущий INPUT началом следующего элемента  */
+                                            !flagInput){
+                break; /** Окончание текущего элемента */
+             }
         uloEdit.append(dat);
         maxIdx = uloEdit.last().getNumCommandHex().toInt(&ok, 16);
+        /** Выделение текущей записи в таблице */
+        setSelectRow(mySelection, myModel, indexOperand, row);
        }
-
 }
 
 

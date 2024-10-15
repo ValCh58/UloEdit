@@ -34,7 +34,7 @@ private:
     QList<UloData> uloEdit;
     UloData beginRow;
     int cntRows;
-    void getRelatedRecords(QModelIndex idx, QList<UloData> *jumpNextEl);
+    void getRelatedRecords(QModelIndex idx, QList<QModelIndex> *jumpNextEl);
     bool getFirstRow(QModelIndex idx);
     void getAllRows(QModelIndex idx, QList<UloData> *coUlo);
     bool getPrevRow(QModelIndex idx);
