@@ -68,16 +68,22 @@ void Diagram::clearSelectedRows()
 QModelIndex Diagram::findModIndex(QString operand, int cell4, QString codeHex, int cell0){
     bool ok;
     QModelIndex indexOperand;
+    QModelIndex indexCodeHex;
     QAbstractItemModel *myModel = View->model();
     QItemSelectionModel *mySelection = View->selectionModel();
 
     //clearSelectedRows();
     for(int i = 0; i < MAX_ROWS; i++){
+
         indexOperand = myModel->index(i, cell4, QModelIndex());
-        QModelIndex indexCodeHex = myModel->index(i, cell0, QModelIndex());
-        int intOperand = indexOperand.data().toInt();
-        int intCodeHex = indexCodeHex.data().toInt();
-        if(intOperand == operand.toInt(&ok, 10) && intCodeHex != codeHex.toInt(&ok, 10)){
+        int intOperand = indexOperand.data().toString().toInt(&ok, 16);
+        int iOperand = operand.toInt(&ok, 16);
+
+        indexCodeHex = myModel->index(i, cell0, QModelIndex());
+        int intCodeHex = indexCodeHex.data().toString().toInt(&ok, 16);
+        int iCodeHex = codeHex.toInt(&ok, 16);
+
+        if(intOperand == iOperand && intCodeHex != iCodeHex){
            setSelectRow(mySelection, myModel, indexOperand, indexOperand.row());
            break;
         }
@@ -147,20 +153,18 @@ void Diagram::getRelatedRecords(QModelIndex idx, QList<QModelIndex> *jumpNextEl)
         /** Выделение текущей записи в таблице */
         setSelectRow(mySelection, myModel, indexOperand, row);
        }
+
+        /**Для отладки!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
+        qDebug()<<"\n";
+        foreach(UloData ue, uloEdit){
+                qDebug()<<" K.O. "<<ue.getCodOper()<<" ЛЯ "<<ue.getLogCellCommand()<<" Operation "<<ue.getOperCommand();
+        }
+        qDebug()<<"\n";
+        /////////////////////////////////////////////////
 }
 
 
-//    /**Для отладки!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
-//    qDebug()<<"\n";
-//    foreach(UloData ue, uloEdit){
-//            qDebug()<<" K.O. "<<ue.getCodOper()<<" ЛЯ "<<ue.getLogCellCommand()<<" Operation "<<ue.getOperCommand();
-//    }
-//    qDebug()<<"\n";
-//    foreach(UloData je, *jumpNextEl){
-//        qDebug()<<je.getNumCommandHex()<<" "<<je.getCodHex()<<" "<<je.getCodOper()<<" "<<je.getLogCellCommand()
-//                <<" "<<je.getOperandCommand()<<" "<<je.getOperCommand();
-//    }
-//    qDebug()<<"\n";
+
 
 
 
