@@ -25,6 +25,7 @@ Diagram::Diagram(QTableView *view, int firstRow, int cntRow, QWidget *parent) : 
       processSelectRecords(firstRow, cntRow);
    } else{/** Поиск связанных между собой записей алгоритма по одной выделенной строке в таблице */
        int i = 0;
+       minIdx = -1;
        QModelIndex index = View->currentIndex();
           jumpNextEl.append(index);
           while(jumpNextEl.size() != i) {
@@ -157,7 +158,7 @@ void Diagram::getRelatedRecords(QModelIndex idx, QList<QModelIndex> *jumpNextEl)
         /**Для отладки!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
         qDebug()<<"\n";
         foreach(UloData ue, uloEdit){
-                qDebug()<<" K.O. "<<ue.getCodOper()<<" ЛЯ "<<ue.getLogCellCommand()<<" Operation "<<ue.getOperCommand();
+                qDebug()<<" Command "<<ue.getNumCommandHex()  <<" K.O. "<<ue.getCodOper()<<" ЛЯ "<<ue.getLogCellCommand()<<" Operation "<<ue.getOperCommand();
         }
         qDebug()<<"\n";
         /////////////////////////////////////////////////
@@ -218,7 +219,9 @@ bool Diagram::getFirstRow(QModelIndex idx)
 
     if(idx.isValid()){
        dt = ((UloModelTable*)View->model())->getUloData(idx.row());
-       minIdx = dt.getNumCommandHex().toInt(&ok, 16);
+       if(minIdx == -1){
+          minIdx = dt.getNumCommandHex().toInt(&ok, 16);
+       }
     }else{
        return false;
     }
@@ -901,9 +904,9 @@ bool Diagram::isLyEquLy(UloData *curr, UloData *prev)
  */
 void Diagram::isOutKo(UloData *d)
 {
-     UloData next = getNextElement(d);//Получим следующий элелемент//
+     UloData next = getNextElement(d);//Получим следующий элелемент//Не должен быть пустым!!! если есть другие элементы//
      if(!next.getNumCommandHex().isEmpty()){
-        if(next.getCodOper().toInt()==5){//Если команда OUT?//
+        if(next.getCodOper().toInt() == O_UT){//Если команда OUT?//
            addElementToMap(mapCnt, &next);
            isOutKo(&next);
         }
