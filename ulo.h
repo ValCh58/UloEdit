@@ -3,6 +3,7 @@
 #include <QObject>
 
 #define MAX_ROWS 0x7FFC
+#define MIN_IDX  -1
 
 /** Logical cell  */
 #define LY_1

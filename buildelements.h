@@ -34,7 +34,7 @@ public:
 
 
 private:
-    void testIntersectionPointWithLine(QPointF pf);//Анализ пересечения токи терминала с линией кондуктора//
+    void testIntersectionPointWithLine(QPointF pf);//Анализ пересечения точки терминала с линией кондуктора//
     void typeLineCorrection1(int cntPoint);//Тип коррекции линий соединения №1.//
     void typeLineCorrection2();//Тип коррекции линий соединения №2. Cоединение верхнего терминала пересекаются соединением нижнего.//
     QList<Conductor*> selectBusyTerminals(CustomElement *el);//Отбор терминалов имеющих соединения//

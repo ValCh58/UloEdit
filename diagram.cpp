@@ -25,7 +25,7 @@ Diagram::Diagram(QTableView *view, int firstRow, int cntRow, QWidget *parent) : 
       processSelectRecords(firstRow, cntRow);
    } else{/** Поиск связанных между собой записей алгоритма по одной выделенной строке в таблице */
        int i = 0;
-       minIdx = -1;
+       minIdx = MIN_IDX;
        QModelIndex index = View->currentIndex();
           jumpNextEl.append(index);
           while(jumpNextEl.size() != i) {
@@ -219,7 +219,7 @@ bool Diagram::getFirstRow(QModelIndex idx)
 
     if(idx.isValid()){
        dt = ((UloModelTable*)View->model())->getUloData(idx.row());
-       if(minIdx == -1){
+       if(minIdx == MIN_IDX){
           minIdx = dt.getNumCommandHex().toInt(&ok, 16);
        }
     }else{
@@ -247,7 +247,7 @@ void Diagram::getAllRows(QModelIndex idx, QList<UloData> *coUlo)
 
 /**
  * Смотрим последнюю операцию в предыдущей записи,
- * если недопустимая команда между INPUT и OUT - Ошибка.
+ * если недопустимая команда между INPUT и OUT кроме NOP - Ошибка.
  * @brief Diagram::getPrevRow
  * @param idx
  * @return
