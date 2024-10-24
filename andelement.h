@@ -16,17 +16,17 @@ public:
     void makeAndElement(QPainter &qp);
     void makeTerminal(Terminal *t, Qt::GlobalColor color, QPainter &qp);
     void buildElement(DataGraph &dtg);
-    //Обмен координатами терминалов//
+    /**Обмен координатами терминалов*/
     void swapCoordTerm(Terminal *term1, Terminal *term2, QPainter &qp);
     void makeAnyElement(QPainter&qp);
 protected:
-    //Получить индекс терминала в списке терминалов по параметру t//
+    /** Получить индекс терминала в списке терминалов по параметру t */
     int  getIndex(Terminal* t);
-    //Корреция элементов с тремя терминалами. Два входа один выход.//
+    /** Корреция элементов с тремя терминалами. Два входа один выход */
     void adjustElem3Term(QPainter &qp, DataGraph &dtg);
-    //Получение типа элемента для коррекции терминалов//
+    /** Получение типа элемента для коррекции терминалов */
     int  elemTypeAdust();
-    //Коррекция терминалов элементов//
+    /** Коррекция терминалов элементов */
     void adjustTermElement(QPainter &qp, DataGraph &dtg);
 
 };

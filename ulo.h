@@ -6,9 +6,9 @@
 #define MIN_IDX  -1
 
 /** Logical cell  */
-#define LY_1
-#define LY_2
-#define LY_3
+#define LY_1   1
+#define LY_2   2
+#define LY_3   3
 
 /** Elements */
 #define OR      0

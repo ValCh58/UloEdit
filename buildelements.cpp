@@ -37,7 +37,7 @@ BuildElements::BuildElements(SchemeAlgo *scheme, QMap<int, QMap<int, UloData> > 
     tmpPoint = startPoint;
     tmpDeltaY = 0;
 
-}//-----------------------------------------------------------------------------------------//
+}
 
 /**
  * @brief BuildElements::~BuildElements
@@ -53,41 +53,41 @@ void BuildElements::greateElements()
     QMap <int, QMap<int, UloData>>::const_iterator it = ulodata->begin();
     int idx = 0;
 
-     while(it != ulodata->end()){//Проход по внешней коллeкции//
-          //Один элемент внешней коллекции = QMap<int, UloData>//
-          QList<int> keys = it->keys();//Получим ключи для QMap<int, UloData>//
-          QList<UloData> vls = it->values();//UloData//
+     while(it != ulodata->end()){/**Проход по внешней коллeкции*/
+          /**Один элемент внешней коллекции = QMap<int, UloData>*/
+          QList<int> keys = it->keys();/**Получим ключи для QMap<int, UloData>*/
+          QList<UloData> vls = it->values();/**UloData*/
           int typeLogo = 0;
-          int typeElm = getTypeElement(vls, &typeLogo);//Получим тип элемента//
-          listElem << buildElement(typeElm, typeLogo);//Создание и загрузка элемента//
+          int typeElm = getTypeElement(vls, &typeLogo);/**Получим тип элемента*/
+          listElem << buildElement(typeElm, typeLogo);/**Создание и загрузка элемента**/
           QString nameEl;
           if(typeElm == TMR)
-             nameEl = vls.at(0).getOperandCommand();//Название для таймера//
+             nameEl = vls.at(0).getOperandCommand();/**Название для таймера*/
           else
-             nameEl = vls.at(0).getNumCommandHex();//Остальные элементы//
+             nameEl = vls.at(0).getNumCommandHex();/**Остальные элементы*/
           if(typeElm == UNI && vls.at(0).getOperandCommand().isEmpty()){
-             nameEl = getNameUniEl(vls);//Получим имя универсального элемента//
+             nameEl = getNameUniEl(vls);/**Получим имя универсального элемента*/
           }
-          listElem.at(idx)->setNameEl(nameEl);//Зададим имя элемента//
-          int numTerm = 1;//Начальный номер терминала в элементе//
+          listElem.at(idx)->setNameEl(nameEl);/**Зададим имя элемента*/
+          int numTerm = 1;/**Начальный номер терминала в элементе*/
           int copyId=0;
-          //Создадим терминалы элемента из данных таблицы//
-          for(int id:keys){
+          /**Создадим терминалы элемента из данных таблицы*/
+          for(int id : keys){
               UloData dat = it->value(id);
               if(typeElm == UNI_TG){
                  createTerminal(typeLogo, &dat, numTerm, idx);//Создадим терминал для элемента Tq/Tr/Ts //
               }else if(typeElm == UNI || typeElm == UNI_2_3 || typeElm == UNI_F9  || typeElm == UNI_99 || typeElm == UNI_41){// Проверить !!!
-                  //Для данного элемента дополнительно создаются два параметра//
-                  //тип логики и количество входов на этот тип элемента//
-                  if(dat.getCodOper().toInt()!=UNI)//UNI элемент//
+                  /**Для данного элемента дополнительно создаются два параметра*/
+                  /**тип логики и количество входов на этот тип элемента*/
+                  if(dat.getCodOper().toInt()!=UNI)/**UNI элемент*/
                      createTerminal(&dat, numTerm, idx);
               }else{
-                 createTerminal(&dat, numTerm, idx);//Создадим терминал для элемента AND/OR//
+                 createTerminal(&dat, numTerm, idx);/** Создадим терминал для элемента AND/OR */
               }
               copyId = id;
               numTerm++;
-          }//--------------------------------------------//
-          //Триггер без ВХОДОВ? достроим!!!//
+          }
+          /** Триггер без ВХОДОВ? достроим!!! */
           if(listElem.at(idx)->getTypeEl() == UNI_TG && listElem.at(idx)->getCntTermWest()==0){
              UloData dat = it->value(copyId);
              createMissingTermInput(typeLogo, &dat, 1, idx);
@@ -99,11 +99,11 @@ void BuildElements::greateElements()
               else if(getTermINpTypeTg(idx) == IN_R)
                  createMissingTermInput(typeLogo, &dat, 1, idx);
           }
-          //Проверка универсального элемента на соответствие количества входов//
+          /**Проверка универсального элемента на соответствие количества входов*/
           if(listElem.at(idx)->getTypeEl() == UNI || listElem.at(idx)->getTypeEl() == UNI_2_3
                   || listElem.at(idx)->getTypeEl() == UNI_F9 || listElem.at(idx)->getTypeEl() == UNI_99
                   || listElem.at(idx)->getTypeEl() == UNI_41){
-             int maxNumCell=getMaxLy(listElem.at(idx));//Получим кол. входов ун. элемента, которое должно быть//
+             int maxNumCell=getMaxLy(listElem.at(idx));/**Получим кол. входов ун. элемента, которое должно быть*/
 
              while(maxNumCell > 0){
                  if(!scanInputUniEl(listElem.at(idx), maxNumCell)){
@@ -112,16 +112,16 @@ void BuildElements::greateElements()
                  }
                  maxNumCell--;
              }
-             //Установим типы (AND, OR) первичных элементов//
+             /**Установим типы (AND, OR) первичных элементов*/
              setTypePrimElUni(listElem.at(idx));
           }
 
-          //Элемент без OUT? Проверим!!!
+          /** Элемент без OUT? Проверим!!! */
           if(listElem.at(idx)->getCntTermEast()==0){
              UloData dat = it->value(copyId);
              createMissingTerminal(&dat, numTerm, idx, "5");
           }
-          //Элемент без INPUT? Проверим!!!
+          /** Элемент без INPUT? Проверим!!! */
           if(isNotInputTerm(vls) && listElem.at(idx)->getTypeEl() != UNI && listElem.at(idx)->getTypeEl() != UNI_2_3
                    && listElem.at(idx)->getTypeEl() != UNI_F9 && listElem.at(idx)->getTypeEl() != UNI_99
                    && listElem.at(idx)->getTypeEl() != UNI_41){
@@ -131,7 +131,7 @@ void BuildElements::greateElements()
           it++;idx++;
     }
     paintElements();
-}//-----------------------------------------------------------------------------------------//
+}
 
 /**
  * Получим мах номер лог. ячейки
@@ -148,8 +148,7 @@ void BuildElements::greateElements()
     }
 
     return retVal;
-}//------------------------------------------------------------------------------------------//
-
+}
  /**
  * Просмотрим первичные группы элем. универсального элемента на содержание К.О. INPUT
  * @brief BuildElements::scanInputUniEl
@@ -169,7 +168,7 @@ bool BuildElements::scanInputUniEl(CustomElement *el, int numCell)
     }
 
     return retVal;
-}//-----------------------------------------------------------------------------------------//
+}
 
 /**
  * Создать недостающий вход унив. элемента
@@ -209,7 +208,7 @@ void BuildElements::createTermInputUni(int logo, UloData *dat, int num, int idx)
                  t->setNumber(++number);
         }
     }
-}//-----------------------------------------------------------------------------------------//
+}
 
 /**
  * Установим типы (AND, OR) первичных элементов
@@ -241,7 +240,7 @@ void BuildElements::setTypePrimElUni(CustomElement *el)
         }
         t->setTypePrimElUni(ko);
     }
-}//-----------------------------------------------------------------------------------------//
+}
 
 /**
  * Отрисовка элементов схемы
@@ -249,27 +248,27 @@ void BuildElements::setTypePrimElUni(CustomElement *el)
  */
 void BuildElements::paintElements()
 {
-    calcSizeElements();//Определение размеров элементов//
-    calcPosElements(); //Определение позиций элементов//
+    calcSizeElements();/** Определение размеров элементов */
+    calcPosElements(); /** Определение позиций элементов */
     for(CustomElement *el : listElem){
         el->buildElement(dGraph);
         QPoint p(el->getLocalPos().x(), el->getLocalPos().y());
         QSize s(el->getSizeElem().width(), el->getSizeElem().height());
-        dGraph.setWalkability(p, s);//Построение непроходимых вершин//
+        dGraph.setWalkability(p, s);/** Построение непроходимых вершин */
         //scene->addItem(el);
     }
 
-    dGraph.setWalkabilityArray(points);//Установим непроходимые вершины////////
-    createConductors();//Создадим соединения между элементами//
-    typeLineCorrection1(26);//Тип коррекции линии №1//
+    dGraph.setWalkabilityArray(points);/** Установим непроходимые вершины */
+    createConductors();/** Создадим соединения между элементами */
+    typeLineCorrection1(26);/** Тип коррекции линии №1 */
     typeLineCorrection2();
-    terminalCorrections();//Коррекция терминалов элементов//
+    terminalCorrections();/** Коррекция терминалов элементов */
     terminalCorrectionFreeOut();//??Доделать анализ пересечений точки терминала линией??
-    drawElements();//Отрисовка элементов/////////////
-    drawConductors();//Отрисовка соединителей//
-    testDrawPoints();//Отрисовка непроходимых вершин. Для отладки//
+    drawElements();/** Отрисовка элементов */
+    drawConductors();/** Отрисовка соединителей */
+    testDrawPoints();/** Отрисовка непроходимых вершин. Для отладки */
 
-}//-----------------------------------------------------------------------------------------//
+}
 
 /**
  * Тип коррекции линии №1
@@ -301,7 +300,7 @@ void BuildElements::typeLineCorrection1(int cntPoint)
         }
     }
 
-}//----------------------------------------------------------------------------------------//
+}
 
 /**
  * Cоединение верхнего терминала пересекаются соединением нижнего
@@ -316,7 +315,7 @@ void BuildElements::typeLineCorrection2()
            swapAndMakeCo(list);//Проверка на пересечение и обработка пересечений терминалов//
         }
     }
-}//----------------------------------------------------------------------------------------//
+}
 
 /**
  * Отбор соединений связаных с выходами элемента
@@ -335,7 +334,7 @@ QList<Conductor *> BuildElements::selectBusyTerminals(CustomElement *el)
         }
     }
     return list;
-}//----------------------------------------------------------------------------------------//
+}
 
 /**
  * Замена терминалов и построение их соединений
@@ -382,7 +381,7 @@ void BuildElements::swapAndMakeCo(QList<Conductor *> list)
               }
           }
       }
-}//----------------------------------------------------------------------------------------//
+}
 
 /**
  * Установка вершин непроходимости на концах неподключенных терминалов
@@ -403,7 +402,7 @@ void BuildElements::terminalCorrectionFreeOut()
             }
         }
     }
-}//----------------------------------------------------------------------------------------//
+}
 
 /**
  * Анализ пересечения токи терминала с линией кондуктора
@@ -421,7 +420,7 @@ void BuildElements::testIntersectionPointWithLine(QPointF pf)
         }
     }
 
-}//----------------------------------------------------------------------------------------//
+}
 
 /**
  * Отрисовка непроходимых вершин. Для отладки
@@ -434,7 +433,7 @@ void BuildElements::testDrawPoints()
         pi->setPos(p);
         scene->addItem(pi);
     }
-}//---------------------------------------------------------------------------------------//
+}
 
 /**
  * Отрисовка элементов
@@ -445,7 +444,7 @@ void BuildElements::drawElements()
     for(CustomElement *el : listElem){
         scene->addItem(el);
     }
-}//---------------------------------------------------------------------------------------//
+}
 
 /**
  * Отрисовка соединителей
@@ -456,7 +455,7 @@ void BuildElements::drawConductors()
     for(Conductor *co:listCo){
         scene->addItem(co);
     }
-}//---------------------------------------------------------------------------------------//
+}
 
 /**
  * Коррекция терминалов элементов
@@ -465,12 +464,12 @@ void BuildElements::drawConductors()
 void BuildElements::terminalCorrections()
 {
     ParsingCo* pc = new ParsingCo(listCo);
-    pc->mainParsing();//Изменение длинны терминалов в зависимости от кол. вх/вых.
+    pc->mainParsing();/** Изменение длинны терминалов в зависимости от кол. вх/вых */
     delete pc;
-}//---------------------------------------------------------------------------------------//
+}
 
 /**
- * Создание отсутствующих входов УН эл
+ * Создание отсутствующих входов УНиверсального элемента
  * @brief BuildElements::createUniInp
  * @param cell
  * @return
@@ -493,7 +492,7 @@ bool BuildElements::createUniInp(int cell)
     }
 
     return ret;
-}//---------------------------------------------------------------------------------------//
+}
 
 
 /**
@@ -506,7 +505,8 @@ void BuildElements::createConductors()
     createConductorsAndOr();
     createConductorsTg();
     createConductorsUni();
-}//---------------------------------------------------------------------------------------//
+    createConductorsAllWest();
+}
 
 
 /**
@@ -530,7 +530,7 @@ void BuildElements::createConductorsAndOr()
         }
         idx++;
     }
-}//-----------------------------------------------------------------------------------------//
+}
 
 /**
  * Создание соединений с соседними элементами в прямой видимости
@@ -547,7 +547,53 @@ void BuildElements::createConductorsAll()
             getP1P2Terminal(currEl, nextEl);
         }
     }
-}//-----------------------------------------------------------------------------------------//
+}
+
+
+/**
+ * Создание соединений с соседними элементами со сторонами WEST
+ * @brief BuildElements::createConductorsAll
+ */
+void BuildElements::createConductorsAllWest()
+{
+    for(int i=0; i < listElem.size(); i++){
+        CustomElement *currEl=listElem.at(i);
+        for(int j=i+1; j < listElem.size(); j++){
+            CustomElement *nextEl=listElem.at(j);
+            if(isTimersEl(currEl, nextEl))
+               continue;
+            getP1P2TerminalWest(currEl, nextEl);//!!!!!!!!!!!! Вылетаем с нарушением границ списка!!!!!!!!
+        }
+    }
+}
+
+
+/**
+ * Получим терминалы для построения соединений по одноименным адресам
+ *  INPUT -> INPUT
+ * @brief BuildElements::getP1P2TerminalWest
+ * @param currEl
+ * @param nextEl
+ */
+void BuildElements::getP1P2TerminalWest(CustomElement* currEl, CustomElement*  nextEl)
+{
+    const QList<Terminal *> curr = currEl->listTerminals;
+    const QList<Terminal *> next = nextEl->listTerminals;
+
+    for(int i=0; i<curr.size(); i++){
+        Terminal *t1=curr.at(i);
+        if(t1->ori==Ulo::West){/** Ulo::West Сторона INPUT */
+           for(int j=0; j<next.size(); j++){
+               Terminal *t2=next.at(j);
+               if(t2->ori==Ulo::West && t1->getName().indexOf(t2->getName())==0 && !(t1->getName().isEmpty() || t2->getName().isEmpty())){
+                  if(isShortCircTimer(t1)){
+                     listCo << (new Conductor(/*t1*/curr.at(1), /*t2*/next.at(0), currEl, nextEl ,dGraph));
+                  }
+               }
+           }
+        }
+    }
+}
 
 
 /**
@@ -560,10 +606,17 @@ void BuildElements::createConductorsAll()
 bool BuildElements::isTimersEl(CustomElement *el, CustomElement *elNext)
 {
     return (el->getNameEl().indexOf(elNext->getNameEl())==0 && el->getTypeEl()==TMR);
-}//-----------------------------------------------------------------------------------------//
+}
 
 
-//Поиск терминала по имени///////////////////////////////////////////////////////////////////
+/**
+ * Поиск терминала по имени
+ * @brief BuildElements::serchByNameTerm
+ * @param el
+ * @param name
+ * @param ori
+ * @return
+ */
 Terminal *BuildElements::serchByNameTerm(CustomElement *el, QString name, Ulo::Orientation ori) const
 {
     Terminal *tmp = nullptr;
@@ -576,7 +629,7 @@ Terminal *BuildElements::serchByNameTerm(CustomElement *el, QString name, Ulo::O
     }
 
     return tmp;
-}//-----------------------------------------------------------------------------------------//
+}
 
 /**
  * Создание соединителя для триггера
@@ -592,7 +645,7 @@ void BuildElements::createConductorsTg()
          if(el->getTypeEl() != UNI_TG)
             continue;
 
-         cell = getNumCellTg(el, 1);
+         cell = getNumCellTg(el,LY_1);
          if(cell != 0){
             t1 = getElTermInpTg(el, cell);
             t2 = getElTermForTg(el, cell, elPrev);
@@ -601,7 +654,7 @@ void BuildElements::createConductorsTg()
             }
          }
 
-         cell = getNumCellTg(el, 2);
+         cell = getNumCellTg(el, LY_2);
          if(cell != 0){
             t1 = getElTermInpTg(el, cell);
             t2 = getElTermForTg(el, cell, elPrev);
@@ -610,7 +663,7 @@ void BuildElements::createConductorsTg()
             }
          }
      }
-}//----------------------------------------------------------------------------------------//
+}
 
 /**
  * Создание соединения для универсального элемента
@@ -627,7 +680,7 @@ void BuildElements::createConductorsUni()
                                      && el->getTypeEl() != UNI_99 && el->getTypeEl() != UNI_41)
             continue;
 
-         cell = getNumCellTg(el, 1);
+         cell = getNumCellTg(el, LY_1);
          if(cell != 0){
             t1 = getElTermInpTg(el, cell);
             t2 = getElTermForTg(el, cell, elPrev);
@@ -636,7 +689,7 @@ void BuildElements::createConductorsUni()
             }
          }
 
-         cell = getNumCellTg(el, 2);
+         cell = getNumCellTg(el, LY_2);
          if(cell != 0){
             t1 = getElTermInpTg(el, cell);
             t2 = getElTermForTg(el, cell, elPrev);
@@ -645,7 +698,7 @@ void BuildElements::createConductorsUni()
             }
          }
 
-         cell = getNumCellTg(el, 3);
+         cell = getNumCellTg(el, LY_3);
          if(cell != 0){
             t1 = getElTermInpTg(el, cell);
             t2 = getElTermForTg(el, cell, elPrev);
@@ -654,7 +707,7 @@ void BuildElements::createConductorsUni()
             }
          }
      }
-}//-----------------------------------------------------------------------------------------//
+}
 
 /**
  * Получим элементы на входе триггера входящих в триггер
@@ -688,7 +741,7 @@ Terminal *BuildElements::getElTermForTg(CustomElement *el, int cell, CustomEleme
         }
     }
     return nullptr;
-}//-----------------------------------------------------------------------------------------//
+}
 
 
 /**
@@ -713,7 +766,7 @@ bool BuildElements::isElTermOut(CustomElement *el)
     }
 
     return ret;
-}//-----------------------------------------------------------------------------------------//
+}
 
 /**
  * Есть ли у следующего элемента вход INPUT?
@@ -733,7 +786,7 @@ bool BuildElements::isElTermInp(const CustomElement *el)
     }
 
     return ret;
-}//-----------------------------------------------------------------------------------------//
+}
 
 
 /**
@@ -745,7 +798,7 @@ bool BuildElements::isElTermInp(const CustomElement *el)
 int BuildElements::getNumCell(CustomElement *el)
 {
     return el->listTerminals.at(0)->uloDat.getLogCellCommand().toInt();
-}//-----------------------------------------------------------------------------------------//
+}
 
 /**
  * Получим ячейку триггера без адреса
@@ -764,7 +817,7 @@ int BuildElements::getNumCellTg(CustomElement *el, int cell)
         }
     }
     return ret;
-}//-----------------------------------------------------------------------------------------//
+}
 
 /**
  * Получим вход триггера без адреса
@@ -784,7 +837,7 @@ Terminal *BuildElements::getElTermInpTg(CustomElement *el, int cell) const
         }
     }
     return p;
-}//-----------------------------------------------------------------------------------------//
+}
 
 /**
  * Получить одиночный терминал на выходе элемента
@@ -804,7 +857,7 @@ Terminal *BuildElements::getP1Terminal(QList<Terminal *> term, CustomElement *el
         }
     }
     return tmp;
-}//-----------------------------------------------------------------------------------------//
+}
 
 /**
  * Получить входной терминал без имени/адреса
@@ -823,11 +876,12 @@ Terminal *BuildElements::getP2Terminal(QList<Terminal *> term)
         }
     }
     return tmp;
-}//-----------------------------------------------------------------------------------------//
+}
 
 
 /**
  * Получим терминалы для построения соединений по одноименным адресам
+ *  OUT -> INPUT
  * @brief BuildElements::getP1P2Terminal
  * @param currEl
  * @param nextEl
@@ -839,10 +893,11 @@ void BuildElements::getP1P2Terminal(CustomElement* currEl, CustomElement*  nextE
 
     for(int i=0; i<curr.size(); i++){
         Terminal *t1=curr.at(i);
-        if(t1->ori==Ulo::East){
+        if(t1->ori==Ulo::East){/** Ulo::East Сторона OUT */
            for(int j=0; j<next.size(); j++){
                Terminal *t2=next.at(j);
-               if(t2->ori==Ulo::West && t1->getName().indexOf(t2->getName())==0 &&
+               if(t2->ori==Ulo::West && /** Сторона INPUT */
+                       t1->getName().indexOf(t2->getName())==0 &&
                                        !(t1->getName().isEmpty() || t2->getName().isEmpty())){
                   if(isShortCircTimer(t1)){
                      //listCo << (new Conductor(t1, t2, currEl, nextEl)); //Без поиска пути!//
@@ -852,7 +907,7 @@ void BuildElements::getP1P2Terminal(CustomElement* currEl, CustomElement*  nextE
            }
         }
     }
-}//-----------------------------------------------------------------------------------------//
+}
 
 
 /**
@@ -877,10 +932,10 @@ bool BuildElements::isShortCircTimer(Terminal *term)
 
     return ret;
 }
-//-----------------------------------------------------------------------------------------//
+
 
 /**
- * Создание соединителей **********************************************************************
+ * Создание соединителей *******************************************************************
  *
  */
 
@@ -900,7 +955,7 @@ QString BuildElements::getNameUniEl(QList<UloData> v)
         }
     }
     return name;
-}//-----------------------------------------------------------------------------------------//
+}
 
 /**
  * @brief BuildElements::createTerminal
@@ -911,7 +966,7 @@ QString BuildElements::getNameUniEl(QList<UloData> v)
 void BuildElements::createTerminal(UloData *dat, int num, int idx)
 {
     listElem.at(idx)->listTerminals << (new Terminal(dat, num, listElem.at(idx)));
-}//-----------------------------------------------------------------------------------------//
+}
 
 /**
  * @brief BuildElements::createTerminal
@@ -929,7 +984,7 @@ void BuildElements::createTerminal(int logo, UloData *dat, int num, int idx)
     }else{
        listElem.at(idx)->listTerminals << (new Terminal(logo, dat, num, listElem.at(idx)));
     }
-}//-----------------------------------------------------------------------------------------//
+}
 
 /**
  * @brief BuildElements::createMissingTerminal
@@ -944,7 +999,7 @@ void BuildElements::createMissingTerminal(UloData *dat, int num, int idx, QStrin
     dat->setCodOper(codeOper);//Обманем конструктор//
     dat->setOperandCommand("");
     listElem.at(idx)->listTerminals << (new Terminal(dat, num, listElem.at(idx)));
-}//-----------------------------------------------------------------------------------------//
+}
 
 /**
  * Проверим есть ли INPUT вход у элемента AND/OR
@@ -964,7 +1019,7 @@ bool BuildElements::isNotInputTerm(QList<UloData> &va)
     }
 
     return ret;
-}//-----------------------------------------------------------------------------------------//
+}
 
 /**
  * @brief BuildElements::createMissingTermInput
@@ -982,7 +1037,7 @@ void BuildElements::createMissingTermInput(int logo, UloData *dat, int num, int 
     s = QString("%1").arg(num);
     dat->setLogCellCommand(s);
     listElem.at(idx)->listTerminals << (new Terminal(logo, dat, num, listElem.at(idx)));
-}//-----------------------------------------------------------------------------------------//
+}
 
 /**
  * @brief BuildElements::getTermINpTypeTg
@@ -1000,7 +1055,7 @@ int BuildElements::getTermINpTypeTg(int idx){
     }
 
     return retVal;
-}//-----------------------------------------------------------------------------------------//
+}
 
 /**
  * Получим тип элемента
@@ -1083,7 +1138,7 @@ int BuildElements::getTypeElement(QList<UloData> &va, int *typeTg)
    }
 
    return retType;
-}//-----------------------------------------------------------------------------------------//
+}
 
 /**
  * Фабрика элементов
@@ -1128,7 +1183,7 @@ CustomElement *BuildElements::buildElement(int type, int typeTg)
     }
 
     return (new OrElement(paper));
-}//----------------------------------------------------------------------------------------//
+}
 
 /**
  * @brief BuildElements::calcSizeElements
@@ -1142,7 +1197,7 @@ void BuildElements::calcSizeElements()
            el->setSizeElem(getSizeElem(el));
         }
     }
-}//-----------------------------------------------------------------------------------------//
+}
 
 
 /**
@@ -1164,7 +1219,7 @@ QSizeF BuildElements::getSizeElem(CustomElement *elEl)
     elEl->getRefElem().setHeight(h);//Высота элемента//
 
     return elEl->getSizeElem();
-}//-----------------------------------------------------------------------------------------//
+}
 
 /**
  * @brief BuildElements::getSizeTg
@@ -1182,7 +1237,7 @@ QSizeF BuildElements::getSizeTg(CustomElement *elTg)
     elTg->getRefElem().setWidth(h*0.5);//Ширина элемента триггер//
 
     return elTg->getSizeElem();
-}//-----------------------------------------------------------------------------------------//
+}
 
 /**
  * @brief BuildElements::calcPosElements
@@ -1202,7 +1257,7 @@ void BuildElements::calcPosElements()
              el->setLocalPos(p);
          }
     }
-}//-----------------------------------------------------------------------------------------//
+}
 
 /**
  * @brief BuildElements::setPointElem
@@ -1214,7 +1269,7 @@ QPointF BuildElements::setPointElem(CustomElement *el)
     QPointF p;
     p=setLayout1(el);
     return p;
-}//-----------------------------------------------------------------------------------------//
+}
 
 
 /**
@@ -1230,7 +1285,7 @@ QPointF BuildElements::setLayout1(CustomElement *el)
     qreal dX = 0.0;
     //retVal = tmpPoint;
 
-    //Отслеживание макс высоты элемента//
+    /** Отслеживание макс высоты элемента */
     if(tmpDeltaY < locSize.height()){
        tmpDeltaY = locSize.height();
     }
@@ -1261,7 +1316,7 @@ QPointF BuildElements::setLayout1(CustomElement *el)
     retVal = tmpPoint;
 
     return retVal;
-}//----------------------------------------------------------------------------------------//
+}
 
 
 
@@ -1286,7 +1341,7 @@ bool BuildElements::isCoordMove(qreal width)
         ret=true;
     }
     return ret;
-}//-----------------------------------------------------------------------------------------//
+}
 
 /**
  * @brief BuildElements::isNotTransferEl
@@ -1296,7 +1351,7 @@ bool BuildElements::isCoordMove(qreal width)
 bool BuildElements::isNotTransferEl(CustomElement *el)
 {
     return (tmpPoint.x()+el->getSizeElem().width()+Terminal::termLen*2+indentEdge*2 < paper.width());
-}//-----------------------------------------------------------------------------------------//
+}
 
 /**
  * @brief BuildElements::isTransferEl
@@ -1322,7 +1377,7 @@ bool BuildElements::isTransferEl(CustomElement *el, int cell)
     }
 
     return ret;
-}//-----------------------------------------------------------------------------------------//
+}
 
 
 /**
@@ -1346,7 +1401,7 @@ bool BuildElements::isCorrectEl(CustomElement *el)
     }
 
     return flagTransfer;
-}//-----------------------------------------------------------------------------------------//
+}
 
 /**
  * @brief BuildElements::isElCell
@@ -1365,7 +1420,7 @@ bool BuildElements::isElCell(CustomElement *el, int cellNum)
         }
     }
     return ret;
-}//-----------------------------------------------------------------------------------------//
+}
 
 
 /**
@@ -1390,7 +1445,7 @@ void BuildElements::correctElementsAfter(CustomElement *el)
             curr->setLocalPos(tmpPoint);
         }
     }
-}//-----------------------------------------------------------------------------------------//
+}
 
 
 /**
@@ -1412,7 +1467,7 @@ int BuildElements::getLastPlusX(CustomElement *el, QPointF *point)
         }
     }
     return (i+1);
-}//-----------------------------------------------------------------------------------------//
+}
 
 
 /**
@@ -1429,7 +1484,7 @@ qreal  BuildElements::getCoordYForElemTg(CustomElement *el, int *cnt3)
 
     if(listElem.size() < 2)
        return -1;
-    int idx = listElem.indexOf(el)-1;//Индекс предшествующего элемента триггера//
+    int idx = listElem.indexOf(el)-1;/** Индекс предшествующего элемента триггера */
     CustomElement *ce;
 
     /** Есть ли элементы связанные с входом триггера S? */
@@ -1444,8 +1499,8 @@ qreal  BuildElements::getCoordYForElemTg(CustomElement *el, int *cnt3)
            (*cnt3)++;
            if(y > 0){
               retPoint.setY(y+ce->getLocalPos().y()+20.0);
-              if(retX == 0.0){//Сохраним коорд. Х первого элемента ячейки 2//
-                 retX = ce->getLocalPos().x();//для сдвига элементов ячейки 1//
+              if(retX == 0.0){/** Сохраним коорд. Х первого элемента ячейки 2 */
+                 retX = ce->getLocalPos().x();/** для сдвига элементов ячейки 1 */
               }
               if(maxY < ce->getSizeElem().height()+ce->getLocalPos().y()){
                  maxY = ce->getSizeElem().height()+ce->getLocalPos().y();
@@ -1466,13 +1521,13 @@ qreal  BuildElements::getCoordYForElemTg(CustomElement *el, int *cnt3)
            //if(tmpDeltaY < (maxY)/2)
            //   tmpDeltaY = (maxY)/2;
 
-           if(ce->isInputElem()){//Последний элемент в цепочке?//
+           if(ce->isInputElem()){/** Последний элемент в цепочке? */
               break;
            }
         }
     }
     return retX;
-}//-----------------------------------------------------------------------------------------//
+}
 
 /**
  * Получение обновленной точки(Х,У) предшествующего элемента триггера по входу S
@@ -1489,21 +1544,21 @@ void BuildElements::getCoordXForElemTg(CustomElement *el, qreal X, int *cnt1, in
     qreal dtX = 0.0;
 
     for(int i=idx; i >=0; i--){
-        (*cnt1)++;//Счетчик всех элементов для коррекции//
+        (*cnt1)++;/** Счетчик всех элементов для коррекции */
         ce = listElem.at(i);
         if(getNumCell(ce) == IN_S){
             if(dtX == 0.0){
-               dtX = X - ce->getLocalPos().x();//Смещение по Х элементов//
+               dtX = X - ce->getLocalPos().x();/** Смещение по Х элементов */
             }
             QPoint p(ce->getLocalPos().x()+dtX, ce->getLocalPos().y());
             ce->setLocalPos(p);
-            (*cnt2)++;//Счетчик передвинутых элементов S входе//
-            if(ce->isInputElem()){//Последний элемент в цепочке?//
+            (*cnt2)++;/** Счетчик передвинутых элементов S входе */
+            if(ce->isInputElem()){/** Последний элемент в цепочке? */
                break;
             }
         }
     }
-}//-----------------------------------------------------------------------------------------//
+}
 
 /**
  * @brief BuildElements::correctElements
@@ -1525,7 +1580,7 @@ void BuildElements::correctElements(CustomElement *el, int cnt1, int cnt2)
         corr.setY(correctXY(corr.y(), SchemeAlgo::yGrid));
         ce->setLocalPos(corr);
     }
-}//-----------------------------------------------------------------------------------------//
+}
 
 /**
  * @brief BuildElements::getHeightElemCellInpS
@@ -1548,7 +1603,7 @@ qreal BuildElements::getHeightElemCellInpS(int index, int cell)
         }
     }
     return height;
-}//-----------------------------------------------------------------------------------------//
+}
 
 /**
  * Если х,у элемента не находятся в точке вершины схемы - сделаем коррекцию
@@ -1575,6 +1630,6 @@ QPoint BuildElements::correctXY(QPoint p, int correct)
     p.setY((p.y()/correct)*correct);
 
     return p;
-}//-----------------------------------------------------------------------------------------//
+}
 
 
