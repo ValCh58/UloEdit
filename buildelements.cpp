@@ -501,16 +501,19 @@ bool BuildElements::createUniInp(int cell)
  */
 void BuildElements::createConductors()
 {
-    createConductorsAll();
-    createConductorsAndOr();
-    createConductorsTg();
-    createConductorsUni();
-    createConductorsAllWest();
+    //createConductorsAll();/** Соединитель nameOUT -> nameINPUT */
+    //createConductorsAndOr();/** Соединитель nameOUT -> NOnameINPUT */
+    createConductorsAllWest();/** Соединитель nameINPUT -> nameINPUT :(:(:(*/
+
+//    createConductorsTg();
+//    createConductorsUni();
+
 }
 
 
 /**
- * Создание соединителей для И и ИЛИ элементов
+ * Создание соединителей для И и ИЛИ элементов.
+ * Соединитель nameOUT -> NOnameINPUT.
  * @brief BuildElements::createConductorsAndOr
  */
 void BuildElements::createConductorsAndOr()
@@ -533,7 +536,8 @@ void BuildElements::createConductorsAndOr()
 }
 
 /**
- * Создание соединений с соседними элементами в прямой видимости
+ * Создание соединений с соседними элементами.
+ * Соединитель nameOUT -> nameINPUT.
  * @brief BuildElements::createConductorsAll
  */
 void BuildElements::createConductorsAll()
@@ -542,8 +546,7 @@ void BuildElements::createConductorsAll()
         CustomElement *currEl=listElem.at(i);
         for(int j=i; j < listElem.size(); j++){
             CustomElement *nextEl=listElem.at(j);
-            if(isTimersEl(currEl, nextEl))
-               continue;
+            if(isTimersEl(currEl, nextEl)) { continue; }
             getP1P2Terminal(currEl, nextEl);
         }
     }
@@ -556,13 +559,15 @@ void BuildElements::createConductorsAll()
  */
 void BuildElements::createConductorsAllWest()
 {
+    CustomElement *currEl = nullptr;
+    CustomElement *nextEl = nullptr;
+
     for(int i=0; i < listElem.size(); i++){
-        CustomElement *currEl=listElem.at(i);
-        for(int j=i+1; j < listElem.size(); j++){
-            CustomElement *nextEl=listElem.at(j);
-            if(isTimersEl(currEl, nextEl))
-               continue;
-            getP1P2TerminalWest(currEl, nextEl);//!!!!!!!!!!!! Вылетаем с нарушением границ списка!!!!!!!!
+        currEl=listElem.at(i);
+        for(int j=i+1; j < listElem.size()-1; j++){
+            nextEl=listElem.at(j);
+            if(isTimersEl(currEl, nextEl)){ continue; }
+            getP1P2TerminalWest(currEl, nextEl);
         }
     }
 }
@@ -575,19 +580,23 @@ void BuildElements::createConductorsAllWest()
  * @param currEl
  * @param nextEl
  */
-void BuildElements::getP1P2TerminalWest(CustomElement* currEl, CustomElement*  nextEl)
+void BuildElements::getP1P2TerminalWest(CustomElement *currEl, CustomElement *nextEl)
 {
     const QList<Terminal *> curr = currEl->listTerminals;
     const QList<Terminal *> next = nextEl->listTerminals;
+    Terminal *t1 = nullptr;
+    Terminal *t2 = nullptr;
 
     for(int i=0; i<curr.size(); i++){
-        Terminal *t1=curr.at(i);
-        if(t1->ori==Ulo::West){/** Ulo::West Сторона INPUT */
+        t1=curr.at(i);
+        if(t1->ori==Ulo::West){/** Ulo::West Сторона INPUT */ // Проверить t1 & t2 //
            for(int j=0; j<next.size(); j++){
-               Terminal *t2=next.at(j);
-               if(t2->ori==Ulo::West && t1->getName().indexOf(t2->getName())==0 && !(t1->getName().isEmpty() || t2->getName().isEmpty())){
+               t2=next.at(j);
+               if(t2->ori==Ulo::West &&
+                       t1->getName().indexOf(t2->getName())==0 &&
+                             !(t1->getName().isEmpty() || t2->getName().isEmpty())){
                   if(isShortCircTimer(t1)){
-                     listCo << (new Conductor(/*t1*/curr.at(1), /*t2*/next.at(0), currEl, nextEl ,dGraph));
+                     listCo << (new Conductor(t1, t2, currEl, nextEl ,dGraph));//Ok
                   }
                }
            }

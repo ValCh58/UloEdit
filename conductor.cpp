@@ -26,8 +26,8 @@ Conductor::Conductor(Terminal *p1, Terminal *p2, CustomElement *e1, CustomElemen
    conductor_pen.setCosmetic(true);
    conductor_brush.setStyle(Qt::NoBrush);
    setZValue(9);
-   terminal1->conductors().append(this);//Запись кондуктора в список кондукторов терминала//
-   terminal2->conductors().append(this);//
+   terminal1->conductors().append(this);//Запись кондуктора
+   terminal2->conductors().append(this);//в список кондукторов терминала//
    connectOutInAStar();
    pointToPath();
 }
@@ -116,7 +116,7 @@ DataGraph &Conductor::getDgr() const
     return dgr;
 }
 
-QPointF Conductor::getPoint(Terminal* t)
+QPointF Conductor::getPoint(Terminal* t)//This needs to be corrected !!!!!!!!!
 {
     if(t->ori==Ulo::East)
         return terminal1->getP2();
@@ -134,9 +134,12 @@ void Conductor::connectOutIn()
 //Занесение точек для рисования линии соединения из А*//
 void Conductor::connectOutInAStar()
 {
+    if(terminal1->getOri() == Ulo::West && terminal2->getOri() == Ulo::West)//Tomorrow!!!!!!!!!
+
+    //This needs to be corrected !!!
     QPoint p1(static_cast<int>(getPoint(terminal1).x()), static_cast<int>(getPoint(terminal1).y()));
     QPoint p2(static_cast<int>(getPoint(terminal2).x()), static_cast<int>(getPoint(terminal2).y()));
-    dgr.setPathFinder(p1, p2, true, true);//Начало вниз
+    dgr.setPathFinder(p1, p2, true, true);//Начало вниз  //Check p1 -p2
 
     for(QPoint p : dgr.pathPoints){//Запись точек пути в сегмент соединения//
         segments << ConductorSegment(p);
@@ -177,8 +180,11 @@ void Conductor::segmentsToPath()
 
     QPainterPath path;
 
-    if (segments.isEmpty())
+    if (segments.isEmpty()){
+        QPainterPath();
         setPath(path);
+        return;
+    }
 
     for(ConductorSegment cs : segments){
         path.moveTo(cs.firstPoint());
@@ -193,8 +199,11 @@ void Conductor::pointToPath()
 {
     QPainterPath path;
 
-    if (segments.isEmpty())
+    if (segments.isEmpty()){
+        QPainterPath();
         setPath(path);
+        return;
+    }
 
     path.moveTo(segments.first().firstPoint());
 

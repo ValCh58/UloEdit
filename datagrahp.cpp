@@ -280,16 +280,16 @@ void DataGraph::makeArray(int row, int col)
 
 
 
-//Поиск пути для проведения линии/////////////////////////////////////////////////////////////////////
-/// \brief DataGraph::FindPath
-/// \param startingX Точка Ах
-/// \param startingY Точка Ау
-/// \param targetX   Цель х
-/// \param targetY   Цель у
-/// \param orto      Исключить поиск по диагонали true
-/// \param upDown    Начать поиск вертикально вверх/вниз true-вниз
-/// \return
-///
+/**Поиск пути для проведения линии
+ * brief DataGraph::FindPath
+ * param startingX Точка Ах
+ * param startingY Точка Ау
+ * param targetX   Цель х
+ * param targetY   Цель у
+ * param orto      Исключить поиск по диагонали true
+ * param upDown    Начать поиск вертикально вверх/вниз true-вниз
+ * return
+*/
 int DataGraph::FindPath(int startingX, int startingY, int targetX, int targetY, bool orto, bool upDown)
 {
     int pathfinderID=1;
@@ -323,8 +323,8 @@ int DataGraph::FindPath(int startingX, int startingY, int targetX, int targetY, 
 
     if (onClosedList > 1000000) //переустановка списка время от времени
     {
-        for (int x = 0; x < mapWidth;x++) {
-            for (int y = 0; y < mapHeight;y++)
+        for (int x = 0; x < mapWidth; x++) {
+            for (int y = 0; y < mapHeight; y++)
                 whichList [x][y] = 0;
         }
         onClosedList = 10;

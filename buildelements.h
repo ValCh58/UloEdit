@@ -68,7 +68,7 @@ private:
     Terminal* getP1Terminal(QList<Terminal*> term, CustomElement *el);
     Terminal* getP2Terminal(QList<Terminal*> term);
     void getP1P2Terminal(CustomElement *currEl, CustomElement *nextEl);
-    void getP1P2TerminalWest(CustomElement* currEl, CustomElement*  nextEl); //24-10-2024
+    void getP1P2TerminalWest(CustomElement *currEl, CustomElement *nextEl); //24-10-2024
     bool isShortCircTimer(Terminal *term);
 
     int getMaxLy(CustomElement *el);//Получим мах номер лог. ячейки//
