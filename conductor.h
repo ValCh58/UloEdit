@@ -8,10 +8,14 @@
 #include <QPainter>
 #include <QLinkedList>
 
+
+#include "Ulo.h"
+
 class DataGraph;
 class Terminal;
 class ConductorSegment;
 class CustomElement;
+
 
 //Соединения между элементами//////////////////////////////
 class Conductor : public QObject, public QGraphicsPathItem

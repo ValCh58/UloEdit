@@ -19,13 +19,13 @@ DataGraph::~DataGraph()
 //Установить путь для линии/////////////////////////////////////////////////////////////
 void DataGraph::setPathFinder(QPoint p1, QPoint p2, bool orto, bool updown)
 {
-    int idx1 = getIndex(p1);
-    int idx2 = getIndex(p2);
-    int y1 = getArrY(idx1);
-    int x1 = getArrX(idx1, y1);
-    int y2 = getArrY(idx2);
-    int x2 = getArrX(idx2, y2);
-    getPath(x1, y1, x2, y2, orto, updown);
+    int idx1 = getIndex(p1);//1435
+    int idx2 = getIndex(p2);//1313
+    int y1 = getArrY(idx1); //9
+    int x1 = getArrX(idx1, y1);//22
+    int y2 = getArrY(idx2);//8
+    int x2 = getArrX(idx2, y2);//57
+    getPath(x1, y1, x2, y2, orto, updown);//Ok
     wayPoints();
 }//Установить путь для линии////////////////////////////////////////////////////////////
 
@@ -100,7 +100,7 @@ int DataGraph::getIdxFrom2dArr(int x, int y)
 void DataGraph::wayPoints()
 {
     pathPoints.clear();
-    foreach(QPoint p, listPath){
+    foreach(QPoint p, listPath){  //Пустой listPath !!!!!!   30-10-2024 16:20 !!! Проверить почему listPath пустой.
         int idx = getIdxFrom2dArr(p.x(), p.y());
         qDebug()<<"listPath "<<"X="<<p.x()<<"Y="<<p.y();
         qDebug()<<"wayPoints idx"<<idx;
@@ -292,7 +292,7 @@ void DataGraph::makeArray(int row, int col)
 */
 int DataGraph::FindPath(int startingX, int startingY, int targetX, int targetY, bool orto, bool upDown)
 {
-    int pathfinderID=1;
+    int pathfinderID=1;    //Отладка 30-10-2024 шаг 1 завершен
 
     int onOpenList=0, parentXval=0, parentYval=0,
     xa=0, yb=0, m=0, u=0, v=0, temp=0, corner=0, numberOfOpenListItems=0,
@@ -652,7 +652,7 @@ noPath:
 
 void DataGraph::InitializePathfinder()
 {
-    for (int x = 0; x < numberPeople+1; x++)
+    for (int x = 0; x < numberPeople+1; x++)//numberPeople = 1 (+1)
         pathBank [x] = static_cast<int*> (malloc(4));
 }
 
@@ -664,9 +664,10 @@ void DataGraph::EndPathfinder()
     }
 }
 
+
 void DataGraph::getPath(int startX, int startY, int targetX, int targetY, bool orto, bool updown)
 {
-    InitializePathfinder();
+    InitializePathfinder();//Ok
     FindPath(startX, startY, targetX, targetY, orto, updown);
     EndPathfinder();
 

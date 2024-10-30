@@ -6,6 +6,7 @@
 #include "customelement.h"
 #include "datagrahp.h"
 
+
 #define PR(x) qDebug() << #x " = " << x;
 
 
@@ -15,7 +16,7 @@ QBrush Conductor::conductor_brush = QBrush();
 Conductor::Conductor(Terminal *p1, Terminal *p2, CustomElement *e1, CustomElement *e2, DataGraph& dg):QObject()
    ,QGraphicsPathItem(0)
    ,terminal1(p1)//Вход
-   ,terminal2(p2)//Выход
+   ,terminal2(p2)//Выход/Вход!
    ,elem1(e1)//Элемент выходной
    ,elem2(e2)//Элемент входной
    ,dgr(dg)
@@ -116,7 +117,7 @@ DataGraph &Conductor::getDgr() const
     return dgr;
 }
 
-QPointF Conductor::getPoint(Terminal* t)//This needs to be corrected !!!!!!!!!
+QPointF Conductor::getPoint(Terminal* t)
 {
     if(t->ori==Ulo::East)
         return terminal1->getP2();
@@ -127,19 +128,39 @@ QPointF Conductor::getPoint(Terminal* t)//This needs to be corrected !!!!!!!!!
 
 void Conductor::connectOutIn()
 {
-    segments << ConductorSegment(getPoint(terminal1),getPoint(terminal2));
+    if(terminal1->getOri() == Ulo::West && terminal2->getOri() == Ulo::West){
+        segments << ConductorSegment(getPoint(terminal1),getPoint(terminal2));
+    }else{
+
+        segments << ConductorSegment(getPoint(terminal1),getPoint(terminal2));
+    }
+
+
 }
 
 
 //Занесение точек для рисования линии соединения из А*//
 void Conductor::connectOutInAStar()
 {
-    if(terminal1->getOri() == Ulo::West && terminal2->getOri() == Ulo::West)//Tomorrow!!!!!!!!!
+    QPoint p1;
+    QPoint p2;
 
-    //This needs to be corrected !!!
-    QPoint p1(static_cast<int>(getPoint(terminal1).x()), static_cast<int>(getPoint(terminal1).y()));
-    QPoint p2(static_cast<int>(getPoint(terminal2).x()), static_cast<int>(getPoint(terminal2).y()));
-    dgr.setPathFinder(p1, p2, true, true);//Начало вниз  //Check p1 -p2
+    if(terminal1->getOri() == Ulo::West && terminal2->getOri() == Ulo::West){
+
+        p1.setX(terminal1->getP1().x());
+        p1.setY(terminal1->getP1().y());
+
+        p2.setX(terminal2->getP2().x());
+        p2.setY(terminal2->getP2().y());
+    }else{
+        p1.setX(static_cast<int>(getPoint(terminal1).x()));
+        p1.setY(static_cast<int>(getPoint(terminal1).y()));
+
+        p2.setX(static_cast<int>(getPoint(terminal2).x()));
+        p2.setY(static_cast<int>(getPoint(terminal2).y()));
+    }
+    //Ok
+    dgr.setPathFinder(p1, p2, true, true);//Начало вниз//
 
     for(QPoint p : dgr.pathPoints){//Запись точек пути в сегмент соединения//
         segments << ConductorSegment(p);
@@ -200,9 +221,8 @@ void Conductor::pointToPath()
     QPainterPath path;
 
     if (segments.isEmpty()){
-        QPainterPath();
         setPath(path);
-        return;
+        //return;
     }
 
     path.moveTo(segments.first().firstPoint());

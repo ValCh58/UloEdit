@@ -68,9 +68,10 @@
 //?????????????????????//
 
 class Ulo : public QObject{
-    //Q_OBJECT
+    Q_OBJECT
 
 public:
+
     Q_ENUMS(Orientation)
     enum Orientation {
         /** вВерх */
@@ -82,6 +83,7 @@ public:
         /** вЛево */
         West
     };
+
 
     Q_ENUMS(ConductorSegmentType)
     enum ConductorSegmentType {

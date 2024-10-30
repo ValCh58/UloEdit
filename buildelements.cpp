@@ -542,10 +542,13 @@ void BuildElements::createConductorsAndOr()
  */
 void BuildElements::createConductorsAll()
 {
+    CustomElement *currEl = nullptr;
+    CustomElement *nextEl = nullptr;
+
     for(int i=0; i < listElem.size(); i++){
-        CustomElement *currEl=listElem.at(i);
+        currEl=listElem.at(i);
         for(int j=i; j < listElem.size(); j++){
-            CustomElement *nextEl=listElem.at(j);
+            nextEl=listElem.at(j);
             if(isTimersEl(currEl, nextEl)) { continue; }
             getP1P2Terminal(currEl, nextEl);
         }
@@ -587,14 +590,13 @@ void BuildElements::getP1P2TerminalWest(CustomElement *currEl, CustomElement *ne
     Terminal *t1 = nullptr;
     Terminal *t2 = nullptr;
 
+    /** Сравниваем терминалы текущего элемента(curr) с каждым терминалов следующего элемента(next) */
     for(int i=0; i<curr.size(); i++){
         t1=curr.at(i);
-        if(t1->ori==Ulo::West){/** Ulo::West Сторона INPUT */ // Проверить t1 & t2 //
+        if(t1->ori==Ulo::West){/** Ulo::West Сторона INPUT */
            for(int j=0; j<next.size(); j++){
                t2=next.at(j);
-               if(t2->ori==Ulo::West &&
-                       t1->getName().indexOf(t2->getName())==0 &&
-                             !(t1->getName().isEmpty() || t2->getName().isEmpty())){
+               if(t2->ori==Ulo::West && t1->getName().indexOf(t2->getName())==0 && !(t1->getName().isEmpty() || t2->getName().isEmpty())){
                   if(isShortCircTimer(t1)){
                      listCo << (new Conductor(t1, t2, currEl, nextEl ,dGraph));//Ok
                   }
@@ -899,18 +901,20 @@ void BuildElements::getP1P2Terminal(CustomElement* currEl, CustomElement*  nextE
 {
     const QList<Terminal *> curr = currEl->listTerminals;
     const QList<Terminal *> next = nextEl->listTerminals;
+    Terminal *t1 = nullptr;
+    Terminal *t2 = nullptr;
 
     for(int i=0; i<curr.size(); i++){
-        Terminal *t1=curr.at(i);
+        t1=curr.at(i);
         if(t1->ori==Ulo::East){/** Ulo::East Сторона OUT */
            for(int j=0; j<next.size(); j++){
-               Terminal *t2=next.at(j);
+               t2=next.at(j);
                if(t2->ori==Ulo::West && /** Сторона INPUT */
                        t1->getName().indexOf(t2->getName())==0 &&
                                        !(t1->getName().isEmpty() || t2->getName().isEmpty())){
                   if(isShortCircTimer(t1)){
                      //listCo << (new Conductor(t1, t2, currEl, nextEl)); //Без поиска пути!//
-                     listCo << (new Conductor(t1, t2, currEl, nextEl ,dGraph));
+                     listCo << (new Conductor(t1, t2, currEl, nextEl ,dGraph)); //t1.p1(168,104) t1.p2(208,104)::t2.p1(488,96) t2.p2(528,96)
                   }
                }
            }
