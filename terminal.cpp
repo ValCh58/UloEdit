@@ -128,7 +128,7 @@ QString Terminal::operandToText(QString oprd)
     QString strRet;
     QString pathDir;
 
-    if(uloDat.getOperCommand().indexOf("BVR") == 0 && uloDat.getCodOper().toInt()==5){
+    if(uloDat.getOperCommand().indexOf("BVR") == 0 && uloDat.getCodOper().toInt() == O_UT){
         //Читаем файл cfg
         pathDir = MainWindow::cfgDir+"discret.cfg";
         strRet = getNameBVR(pathDir, oprd);
@@ -191,7 +191,7 @@ void Terminal::init()
     typeInv = getTypeInv();
     setNumber(number);
     setName(uloDat.getOperandCommand());
-    if(uloDat.getCodOper().toInt() == 5){
+    if(uloDat.getCodOper().toInt() == O_UT){
        ori = Ulo::Orientation::East;
        koMult = cElem->getCntTermEast()+1;
        cElem->setCntTermEast(koMult);//Счетчик выходов элемента//

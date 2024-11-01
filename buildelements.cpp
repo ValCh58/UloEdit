@@ -503,10 +503,10 @@ void BuildElements::createConductors()
 {
     //createConductorsAll();/** Соединитель nameOUT -> nameINPUT */
     //createConductorsAndOr();/** Соединитель nameOUT -> NOnameINPUT */
-    createConductorsAllWest();/** Соединитель nameINPUT -> nameINPUT :(:(:(*/
+    createConductorsAllWest();/** Соединитель nameINPUT -> nameINPUT */ //Замыкает таймер!
 
-//    createConductorsTg();
-//    createConductorsUni();
+    createConductorsTg();
+    createConductorsUni();
 
 }
 
@@ -567,7 +567,7 @@ void BuildElements::createConductorsAllWest()
 
     for(int i=0; i < listElem.size(); i++){
         currEl=listElem.at(i);
-        for(int j=i+1; j < listElem.size()-1; j++){
+        for(int j=i+1; j < listElem.size(); j++){
             nextEl=listElem.at(j);
             if(isTimersEl(currEl, nextEl)){ continue; }
             getP1P2TerminalWest(currEl, nextEl);
@@ -590,7 +590,7 @@ void BuildElements::getP1P2TerminalWest(CustomElement *currEl, CustomElement *ne
     Terminal *t1 = nullptr;
     Terminal *t2 = nullptr;
 
-    /** Сравниваем терминалы текущего элемента(curr) с каждым терминалов следующего элемента(next) */
+    /** Сравниваем каждый из терминалов текущего элемента(curr) с каждым терминалов следующих элементов(next) */
     for(int i=0; i<curr.size(); i++){
         t1=curr.at(i);
         if(t1->ori==Ulo::West){/** Ulo::West Сторона INPUT */
@@ -598,7 +598,7 @@ void BuildElements::getP1P2TerminalWest(CustomElement *currEl, CustomElement *ne
                t2=next.at(j);
                if(t2->ori==Ulo::West && t1->getName().indexOf(t2->getName())==0 && !(t1->getName().isEmpty() || t2->getName().isEmpty())){
                   if(isShortCircTimer(t1)){
-                     listCo << (new Conductor(t1, t2, currEl, nextEl ,dGraph));//Ok
+                     listCo << (new Conductor(t1, t2, currEl, nextEl ,dGraph));
                   }
                }
            }

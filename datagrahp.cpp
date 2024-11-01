@@ -309,7 +309,7 @@ int DataGraph::FindPath(int startingX, int startingY, int targetX, int targetY, 
     //targetY = targetY/tileSize;
 
 //2.Быстрые проверки пути: при обстоятельствах недостижимости цели, никакой путь не должен быть сгенерированным
-    //Если начальное местоположение и цель находятся в одном местоположении
+    //Если начальное местоположение и цель находятся в одном и том же местоположении
     if (startX == targetX && startY == targetY && pathLocation[pathfinderID] > 0)
         return found;
     if (startX == targetX && startY == targetY && pathLocation[pathfinderID] == 0)
@@ -339,7 +339,7 @@ int DataGraph::FindPath(int startingX, int startingY, int targetX, int targetY, 
     //Сохраняет текущее положение вдоль выбранного пути для объекта
     pathLocation [pathfinderID] = notStarted;//i.e, = 0
     Gcost[startX][startY] = 0; //Сбросить значение начального квадрата в G до 0
-//4.Добавьте начальное местоположение (точку А) в открытый список проверяемых квадратов.
+//4.Добавить начальное местоположение (точку А) в открытый список проверяемых квадратов.
     numberOfOpenListItems = 1;//Кол. элементов открытого списка//
     //Mассив cодержащий идентификаторы открытых элементов списка
     openList[1] = 1;//Назначить его как верхний (и только в данный момент) элемент в открытом списке, который поддерживается как двоичная куча
