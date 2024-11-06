@@ -55,7 +55,7 @@ void BuildElements::greateElements()
 
      while(it != ulodata->end()){/**Проход по внешней коллeкции*/
           /**Один элемент внешней коллекции = QMap<int, UloData>*/
-          QList<int> keys = it->keys();/**Получим ключи для QMap<int, UloData>*/
+          QList<int> keys = it->keys();/** Получим ключи для QMap<int, UloData> */
           QList<UloData> vls = it->values();/**UloData*/
           int typeLogo = 0;
           int typeElm = getTypeElement(vls, &typeLogo);/**Получим тип элемента*/
@@ -75,7 +75,7 @@ void BuildElements::greateElements()
           for(int id : keys){
               UloData dat = it->value(id);
               if(typeElm == UNI_TG){
-                 createTerminal(typeLogo, &dat, numTerm, idx);//Создадим терминал для элемента Tq/Tr/Ts //
+                 createTerminal(typeLogo, &dat, numTerm, idx);/**Создадим терминал для элемента Tq/Tr/Ts */
               }else if(typeElm == UNI || typeElm == UNI_2_3 || typeElm == UNI_F9  || typeElm == UNI_99 || typeElm == UNI_41){// Проверить !!!
                   /**Для данного элемента дополнительно создаются два параметра*/
                   /**тип логики и количество входов на этот тип элемента*/
@@ -103,8 +103,8 @@ void BuildElements::greateElements()
           if(listElem.at(idx)->getTypeEl() == UNI || listElem.at(idx)->getTypeEl() == UNI_2_3
                   || listElem.at(idx)->getTypeEl() == UNI_F9 || listElem.at(idx)->getTypeEl() == UNI_99
                   || listElem.at(idx)->getTypeEl() == UNI_41){
-             int maxNumCell=getMaxLy(listElem.at(idx));/**Получим кол. входов ун. элемента, которое должно быть*/
-
+             int maxNumCell = getMaxLy(listElem.at(idx));/**Получим кол. входов ун. элемента, которое должно быть*/
+             /** Построим заданное количество элементов по maxNumCell */
              while(maxNumCell > 0){
                  if(!scanInputUniEl(listElem.at(idx), maxNumCell)){
                      UloData dat = it->value(copyId);
@@ -119,14 +119,14 @@ void BuildElements::greateElements()
           /** Элемент без OUT? Проверим!!! */
           if(listElem.at(idx)->getCntTermEast()==0){
              UloData dat = it->value(copyId);
-             createMissingTerminal(&dat, numTerm, idx, "5");
+             createMissingTerminal(&dat, numTerm, idx, O_UT_STR);
           }
           /** Элемент без INPUT? Проверим!!! */
           if(isNotInputTerm(vls) && listElem.at(idx)->getTypeEl() != UNI && listElem.at(idx)->getTypeEl() != UNI_2_3
                    && listElem.at(idx)->getTypeEl() != UNI_F9 && listElem.at(idx)->getTypeEl() != UNI_99
                    && listElem.at(idx)->getTypeEl() != UNI_41){
              UloData dat = it->value(copyId);
-             createMissingTerminal(&dat, numTerm, idx, "6");
+             createMissingTerminal(&dat, numTerm, idx, INP_STR);
           }
           it++;idx++;
     }
@@ -180,7 +180,7 @@ bool BuildElements::scanInputUniEl(CustomElement *el, int numCell)
  */
 void BuildElements::createTermInputUni(int logo, UloData *dat, int num, int idx)
 {
-    dat->setCodOper("6");
+    dat->setCodOper(INP_STR);
     dat->setOperandCommand("");
     dat->setOperCommand("INPUT");
     QString s;
@@ -1024,7 +1024,7 @@ bool BuildElements::isNotInputTerm(QList<UloData> &va)
     bool ret = true;
 
     for(UloData d:va){
-        if(d.getCodOper().toInt()==6){
+        if(d.getCodOper().toInt()==INP){
            ret = false;
            break;
         }
@@ -1042,7 +1042,7 @@ bool BuildElements::isNotInputTerm(QList<UloData> &va)
  */
 void BuildElements::createMissingTermInput(int logo, UloData *dat, int num, int idx)
 {
-    dat->setCodOper("6");
+    dat->setCodOper(INP_STR);
     dat->setOperandCommand("");
     dat->setOperCommand("INPUT");
     QString s;
@@ -1285,7 +1285,7 @@ QPointF BuildElements::setPointElem(CustomElement *el)
 
 
 /**
- * Установка точек X,Y элементов
+ * Установка начальных точек X,Y элементов для отрисовки на схеме
  * @brief BuildElements::setLayout1
  * @param el
  * @return
@@ -1305,16 +1305,16 @@ QPointF BuildElements::setLayout1(CustomElement *el)
     isCoordMove(locSize.width());
 
     if(el->getTypeEl() == UNI_TG && getNumCellTg(el, 2) == IN_R){
-        el->setLocalPos(tmpPoint);//Установим позицию триггера(х,у)//
+        el->setLocalPos(tmpPoint);/** Установим позицию триггера(х,у) */
         if(!isCorrectEl(el)){
-           //При переносе (х,у)=(105,220)//
-           int cntEl=0;//All Elem//
-           int cntRev=0;//INP S//
-           int cnt3=0;//INP R//
+           /** При переносе (х,у)=(105,220) */
+           int cntEl=0;/** All Elem */
+           int cntRev=0;/** INP S */
+           int cnt3=0;/** INP R */
            dX = getCoordYForElemTg(el, &cnt3);
-           if(el->getTypeEl() == UNI_TG && getNumCellTg(el, 1) == IN_S){//Изменим координату Х элемента//
+           if(el->getTypeEl() == UNI_TG && getNumCellTg(el, 1) == IN_S){/** Изменим координату Х элемента */
               getCoordXForElemTg(el, dX, &cntEl, &cntRev);
-              //Коррекция элементов после сдвига по первой ячейке//
+              /** Коррекция элементов после сдвига по первой ячейке */
               cnt3 = cnt3 > cntRev ? cntRev : cnt3;
               correctElements(el, cntEl, cnt3);
            }
@@ -1342,7 +1342,7 @@ bool BuildElements::isCoordMove(qreal width)
     bool ret=false;
 
     if(tmpPoint.x()+width+Terminal::termLen*2+indentEdge*2 < paper.width()){
-       tmpPoint.setX(tmpPoint.x()+Terminal::termLen*2+indentEdge*2);//По умолчанию последовательное размещение//
+       tmpPoint.setX(tmpPoint.x()+Terminal::termLen*2+indentEdge*2);/** По умолчанию последовательное размещение */
     }else{
         startPoint.setX(112.0);
         tmpPoint.setX(startPoint.x());
@@ -1375,15 +1375,15 @@ bool BuildElements::isTransferEl(CustomElement *el, int cell)
 {
     bool ret = false;
     int idx = listElem.indexOf(el)-1;
-    QPointF pTg = el->getLocalPos();//Позиция триггера//
+    QPointF pTg = el->getLocalPos();/** Позиция триггера */
 
     for(int i=idx; i>=0; i--){
         CustomElement *ce = listElem.at(i);
-        if(isElCell(ce, cell) && ce->getLocalPos().y() < pTg.y()){//Перенос элемента?//
+        if(isElCell(ce, cell) && ce->getLocalPos().y() < pTg.y()){/** Перенос элемента? */
            ret = true;
            break;
         }
-        if(isElCell(ce, cell) && ce->isInputElem()){//Последний элемент в цепочке?//
+        if(isElCell(ce, cell) && ce->isInputElem()){/** Последний элемент в цепочке? */
            break;
         }
     }
@@ -1501,7 +1501,7 @@ qreal  BuildElements::getCoordYForElemTg(CustomElement *el, int *cnt3)
 
     /** Есть ли элементы связанные с входом триггера S? */
     if(getNumCellTg(el, 1) == IN_S){
-       y = getHeightElemCellInpS(idx, IN_S);//Сдвиг по У//
+       y = getHeightElemCellInpS(idx, IN_S);/** Сдвиг по У */
     }
 
     for(int i=idx; i >=0; i--){
@@ -1610,7 +1610,7 @@ qreal BuildElements::getHeightElemCellInpS(int index, int cell)
         if(getNumCell(ce) == cell){
             if(height < ce->getSizeElem().height())
                height = ce->getSizeElem().height();
-            if(ce->isInputElem())//Последний элемент в цепочке?//
+            if(ce->isInputElem())/** Последний элемент в цепочке? */
                break;
         }
     }
