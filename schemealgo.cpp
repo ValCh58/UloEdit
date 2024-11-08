@@ -37,7 +37,7 @@ SchemeAlgo::~SchemeAlgo()
  */
 QPointF SchemeAlgo::snapToGrid(const QPointF &p)
 {
-    /** Return a point rounded to the nearest pixel */
+    /** Возвращает точку, округленную до ближайшего пикселя */
     if (QApplication::keyboardModifiers().testFlag(Qt::ControlModifier))
     {
         int p_x = qRound(p.x());
@@ -45,7 +45,7 @@ QPointF SchemeAlgo::snapToGrid(const QPointF &p)
         return (QPointF(p_x, p_y));
     }
 
-    /**Return a point snapped to the grid */
+    /** Вернуть точку, привязанную к сетке */
     int p_x = qRound(p.x() / SchemeAlgo::xGrid) * SchemeAlgo::xGrid;
     int p_y = qRound(p.y() / SchemeAlgo::yGrid) * SchemeAlgo::yGrid;
     return (QPointF(p_x, p_y));
@@ -121,6 +121,5 @@ void SchemeAlgo::drawBackground(QPainter *p, const QRectF &r)
         border_and_titleblock.draw(p);
     //-----------------------------------------------------------
     p->restore();
-
 }
 

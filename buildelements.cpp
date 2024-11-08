@@ -45,7 +45,7 @@ BuildElements::BuildElements(SchemeAlgo *scheme, QMap<int, QMap<int, UloData> > 
 BuildElements::~BuildElements(){}
 
 /**
- * Построение элементов схемы !!!!!!!!!
+ * Построение элементов схемы
  * @brief BuildElements::greateElements
  */
 void BuildElements::greateElements()
@@ -1252,21 +1252,23 @@ QSizeF BuildElements::getSizeTg(CustomElement *elTg)
 }
 
 /**
+ * Установка начальных позиций (Х,У) элементов
+ * для их отрисовки на схеме.
  * @brief BuildElements::calcPosElements
  */
 void BuildElements::calcPosElements()
 {
     if(listElem.size()==0){
        return;
-    }else if(listElem.size()==1){
+    }else if(listElem.size()==1){ /** Один элемент на схеме */
        startPoint.setX(112.0);
        listElem.at(0)->setLocalPos(startPoint);
     }else{
-         for(CustomElement *el:listElem){
-             QPointF p = setPointElem(el);
+         for(CustomElement *el:listElem){ /** Больше одного элемента на схеме */
+             QPointF p = setPointElem(el); /** Установка начальных точек X,Y элементов для отрисовки их на схеме */
              p.setX(correctXY(p.x(),SchemeAlgo::xGrid));
              p.setY(correctXY(p.y(),SchemeAlgo::yGrid));
-             el->setLocalPos(p);
+             el->setLocalPos(p);/** Позиция размещения элемента на схеме */
          }
     }
 }
@@ -1285,7 +1287,7 @@ QPointF BuildElements::setPointElem(CustomElement *el)
 
 
 /**
- * Установка начальных точек X,Y элементов для отрисовки на схеме
+ * Установка начальных точек X,Y элементов для отрисовки их на схеме
  * @brief BuildElements::setLayout1
  * @param el
  * @return
@@ -1343,7 +1345,7 @@ bool BuildElements::isCoordMove(qreal width)
 
     if(tmpPoint.x()+width+Terminal::termLen*2+indentEdge*2 < paper.width()){
        tmpPoint.setX(tmpPoint.x()+Terminal::termLen*2+indentEdge*2);/** По умолчанию последовательное размещение */
-    }else{
+    }else{ /** Перенос на одну позицию элементов по У вниз */
         startPoint.setX(112.0);
         tmpPoint.setX(startPoint.x());
         tmpPoint.setY(tmpPoint.y() + tmpDeltaY + indentEdge/* - 4.0*/);
