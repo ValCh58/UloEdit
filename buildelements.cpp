@@ -1258,20 +1258,60 @@ QSizeF BuildElements::getSizeTg(CustomElement *elTg)
  */
 void BuildElements::calcPosElements()
 {
+    QPointF p;
+
     if(listElem.size()==0){
        return;
     }else if(listElem.size()==1){ /** Один элемент на схеме */
        startPoint.setX(112.0);
        listElem.at(0)->setLocalPos(startPoint);
-    }else{
-         for(CustomElement *el:listElem){ /** Больше одного элемента на схеме */
-             QPointF p = setPointElem(el); /** Установка начальных точек X,Y элементов для отрисовки их на схеме */
-             p.setX(correctXY(p.x(),SchemeAlgo::xGrid));
-             p.setY(correctXY(p.y(),SchemeAlgo::yGrid));
-             el->setLocalPos(p);/** Позиция размещения элемента на схеме */
+    }else if(listElem.size()>1 && isOutGreatOne(listElem)){/** Построение цепочки элементов по каждому OUT */
+
+         for(int iList = 0; iList < listElem.size(); iList++){ /** Больше одного элемента на схеме */
+             p = setPointElemOutGreatOne(listElem.at(iList)); /** Установка начальных точек X,Y элементов для отрисовки их на схеме */
+
+             p.setX(correctXY(p.x(),SchemeAlgo::xGrid)); /** Дополнительная коррекция точки Х */
+             p.setY(correctXY(p.y(),SchemeAlgo::yGrid)); /** Дополнительная коррекция точки Y */
+             listElem.at(iList)->setLocalPos(p);/** Позиция размещения элемента на схеме */
          }
+    }else{
+          for(CustomElement *el:listElem){ /** Больше одного элемента на схеме */
+              p = setPointElem(el); /** Установка начальных точек X,Y элементов для отрисовки их на схеме */
+              p.setX(correctXY(p.x(),SchemeAlgo::xGrid));
+              p.setY(correctXY(p.y(),SchemeAlgo::yGrid));
+              el->setLocalPos(p);/** Позиция размещения элемента на схеме */
+          }
     }
+
 }
+
+QPointF BuildElements::setPointElemOutGreatOne(CustomElement *el){
+    QPointF p;
+
+    if(el && el->getCntTermEast() > 1){
+        //1-найдем элемент с выходами > 1
+        //2-делаем цикл по выходам OUT
+        //3-в каждой итерации ищем цепочку элементов
+        //4-вставляем в карту
+        //5-установим координаты начальной точки p(x,y) элемента
+    }else if(el){
+        p = setPointElem(el);
+    }
+
+    return p;
+}
+
+bool BuildElements::isOutGreatOne(QList<CustomElement *> listElem){
+
+    bool retVal = false;
+    for(CustomElement *ce : listElem){
+        if(retVal = ce->getCntTermEast() > 1 ? true : false)
+           break;
+    }
+    return retVal;
+}
+
+
 
 /**
  * @brief BuildElements::setPointElem
