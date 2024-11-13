@@ -1265,15 +1265,14 @@ void BuildElements::calcPosElements()
     }else if(listElem.size()==1){ /** Один элемент на схеме */
        startPoint.setX(112.0);
        listElem.at(0)->setLocalPos(startPoint);
-    }else if(listElem.size()>1 && isOutGreatOne(listElem)){/** Построение цепочки элементов по каждому OUT */
-
-         for(int iList = 0; iList < listElem.size(); iList++){ /** Больше одного элемента на схеме */
-             p = setPointElemOutGreatOne(listElem.at(iList)); /** Установка начальных точек X,Y элементов для отрисовки их на схеме */
-
-             p.setX(correctXY(p.x(),SchemeAlgo::xGrid)); /** Дополнительная коррекция точки Х */
-             p.setY(correctXY(p.y(),SchemeAlgo::yGrid)); /** Дополнительная коррекция точки Y */
-             listElem.at(iList)->setLocalPos(p);/** Позиция размещения элемента на схеме */
-         }
+    }else if(listElem.size()>1 && isOutGreatOne(listElem)){/** Есть ли элементы с OUT > 1 */
+           setElToMapForOutGreatOne(listElem);
+//         for(int iList = 0; iList < listElem.size(); iList++){ /** Больше одного элемента на схеме */
+//             p = setPointElemOutGreatOne(listElem.at(iList)); /** Установка начальных точек X,Y элементов для отрисовки их на схеме */
+//             p.setX(correctXY(p.x(),SchemeAlgo::xGrid)); /** Дополнительная коррекция точки Х */
+//             p.setY(correctXY(p.y(),SchemeAlgo::yGrid)); /** Дополнительная коррекция точки Y */
+//             listElem.at(iList)->setLocalPos(p);/** Позиция размещения элемента на схеме */
+//         }
     }else{
           for(CustomElement *el:listElem){ /** Больше одного элемента на схеме */
               p = setPointElem(el); /** Установка начальных точек X,Y элементов для отрисовки их на схеме */
@@ -1285,24 +1284,45 @@ void BuildElements::calcPosElements()
 
 }
 
-QPointF BuildElements::setPointElemOutGreatOne(CustomElement *el){
-    QPointF p;
+void BuildElements::setElToMapForOutGreatOne(QList<CustomElement *> listElem){
+        //0-цикл по элементам списка
+        //1-если элемент с одним OUT то вставляем его в карту
+        //2-если элемент с выходами OUT > 1 обработаем его
+        //2.1-делаем цикл по выходам OUT
+        //2.2-в каждой итерации ищем цепочку элементов
+        //2.3-вставляем в карту
 
-    if(el && el->getCntTermEast() > 1){
-        //1-найдем элемент с выходами > 1
-        //2-делаем цикл по выходам OUT
-        //3-в каждой итерации ищем цепочку элементов
-        //4-вставляем в карту
-        //5-установим координаты начальной точки p(x,y) элемента
-    }else if(el){
-        p = setPointElem(el);
+    QMultiMap<QString, CustomElement*> multiMap;
+
+    for(int iList = 0; iList < listElem.size(); iList++){
+        CustomElement *el = listElem.at(iList);
+        if(isOutGreatOne(el)){ /** Перегруппировка последовательности элементов для каждого OUT */
+
+        }else{ /** Запись элемента с одним OUT */
+              multiMap.insert(el->getNameEl(), el);// el->getNameEl() править!!! 13-11-2024 !!!
+        }
     }
-
-    return p;
+    int i=0;
 }
 
-bool BuildElements::isOutGreatOne(QList<CustomElement *> listElem){
 
+/**
+ * Проверка элемента на несколько OUT
+ * @brief BuildElements::isOutGreatOne
+ * @param elem экземпляр элемента
+ * @return
+ */
+bool BuildElements::isOutGreatOne(CustomElement *elem){
+    return elem->getCntTermEast() > 1 ? true : false;
+}
+
+/**
+ * Проверка на нахождение в QList элемента с несколькими OUT
+ * @brief BuildElements::isOutGreatOne
+ * @param listElem список элементов QList
+ * @return
+ */
+bool BuildElements::isOutGreatOne(QList<CustomElement *> listElem){
     bool retVal = false;
     for(CustomElement *ce : listElem){
         if(retVal = ce->getCntTermEast() > 1 ? true : false)
@@ -1310,8 +1330,6 @@ bool BuildElements::isOutGreatOne(QList<CustomElement *> listElem){
     }
     return retVal;
 }
-
-
 
 /**
  * @brief BuildElements::setPointElem
@@ -1324,7 +1342,6 @@ QPointF BuildElements::setPointElem(CustomElement *el)
     p=setLayout1(el);
     return p;
 }
-
 
 /**
  * Установка начальных точек X,Y элементов для отрисовки их на схеме
@@ -1371,8 +1388,6 @@ QPointF BuildElements::setLayout1(CustomElement *el)
 
     return retVal;
 }
-
-
 
 /**
  * @brief BuildElements::isCoordMove
