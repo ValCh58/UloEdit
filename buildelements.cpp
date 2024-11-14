@@ -45,6 +45,17 @@ BuildElements::BuildElements(SchemeAlgo *scheme, QMap<int, QMap<int, UloData> > 
 BuildElements::~BuildElements(){}
 
 /**
+ * Исправлениеимени элемента
+ * @brief BuildElements::correctNameEl
+ * @param strNameEl
+ * @return
+ */
+QString BuildElements::correctNameEl(QString strNameEl){
+
+     return strNameEl.length() < 4 ? "0"+strNameEl.toUpper() : strNameEl;
+}
+
+/**
  * Построение элементов схемы
  * @brief BuildElements::greateElements
  */
@@ -62,11 +73,11 @@ void BuildElements::greateElements()
           listElem << buildElement(typeElm, typeLogo);/**Создание и загрузка элемента**/
           QString nameEl;
           if(typeElm == TMR)
-             nameEl = vls.at(0).getOperandCommand();/**Название для таймера*/
+             nameEl = correctNameEl(vls.at(0).getOperandCommand());/**Название для таймера*/
           else
-             nameEl = vls.at(0).getNumCommandHex();/**Остальные элементы*/
+             nameEl = correctNameEl(vls.at(0).getNumCommandHex());/**Остальные элементы*/
           if(typeElm == UNI && vls.at(0).getOperandCommand().isEmpty()){
-             nameEl = getNameUniEl(vls);/**Получим имя универсального элемента*/
+             nameEl = correctNameEl(getNameUniEl(vls));/**Получим имя универсального элемента*/
           }
           listElem.at(idx)->setNameEl(nameEl);/**Зададим имя элемента*/
           int numTerm = 1;/**Начальный номер терминала в элементе*/
@@ -1268,7 +1279,8 @@ void BuildElements::calcPosElements()
     }else if(listElem.size()>1 && isOutGreatOne(listElem)){/** Есть ли элементы с OUT > 1 */
            setElToMapForOutGreatOne(listElem);
 //         for(int iList = 0; iList < listElem.size(); iList++){ /** Больше одного элемента на схеме */
-//             p = setPointElemOutGreatOne(listElem.at(iList)); /** Установка начальных точек X,Y элементов для отрисовки их на схеме */
+//             p = setPointElem(listElem.at(iList));
+//             //p = setPointElemOutGreatOne(listElem.at(iList)); /** Установка начальных точек X,Y элементов для отрисовки их на схеме */
 //             p.setX(correctXY(p.x(),SchemeAlgo::xGrid)); /** Дополнительная коррекция точки Х */
 //             p.setY(correctXY(p.y(),SchemeAlgo::yGrid)); /** Дополнительная коррекция точки Y */
 //             listElem.at(iList)->setLocalPos(p);/** Позиция размещения элемента на схеме */
@@ -1297,12 +1309,18 @@ void BuildElements::setElToMapForOutGreatOne(QList<CustomElement *> listElem){
     for(int iList = 0; iList < listElem.size(); iList++){
         CustomElement *el = listElem.at(iList);
         if(isOutGreatOne(el)){ /** Перегруппировка последовательности элементов для каждого OUT */
-
+              multiMap.insert(el->getNameEl(), el);
+              makeChainForOut(el, listElem, &multiMap);
         }else{ /** Запись элемента с одним OUT */
-              multiMap.insert(el->getNameEl(), el);// el->getNameEl() править!!! 13-11-2024 !!!
+              multiMap.insert(el->getNameEl(), el);
         }
     }
     int i=0;
+}
+
+void BuildElements::makeChainForOut(CustomElement* elem, QList<CustomElement*> listElem, QMultiMap<QString, CustomElement *> *multiMap){
+
+//14-11-2024//
 }
 
 

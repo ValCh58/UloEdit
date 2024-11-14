@@ -33,12 +33,15 @@ public:
     void paintElements();
     QPolygon points;
 
+    QString correctNameEl(QString strNameEl);
+
 
 private:
 
     void setElToMapForOutGreatOne(QList<CustomElement*> listElem);
     bool isOutGreatOne(QList<CustomElement*> listElem);//11-11-2024
     bool isOutGreatOne(CustomElement* elem);//13-11-2024
+    void makeChainForOut(CustomElement* elem, QList<CustomElement*> listElem, QMultiMap<QString, CustomElement*>* multiMap);
     void testIntersectionPointWithLine(QPointF pf);//Анализ пересечения точки терминала с линией кондуктора//
     void typeLineCorrection1(int cntPoint);//Тип коррекции линий соединения №1.//
     void typeLineCorrection2();//Тип коррекции линий соединения №2. Cоединение верхнего терминала пересекаются соединением нижнего.//

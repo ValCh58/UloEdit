@@ -301,7 +301,7 @@ void CustomElement::swapCoordTerm(Terminal *term1, Terminal *term2)
 
 QString CustomElement::getNameEl() const
 {
-    return nameEl;
+   return nameEl;
 }
 
 void CustomElement::setNameEl(const QString &value)
