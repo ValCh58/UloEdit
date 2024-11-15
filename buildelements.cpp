@@ -1318,11 +1318,39 @@ void BuildElements::setElToMapForOutGreatOne(QList<CustomElement *> listElem){
     int i=0;
 }
 
+/**
+ * @brief BuildElements::makeChainForOut
+ * @param elem
+ * @param listElem
+ * @param multiMap
+ */
 void BuildElements::makeChainForOut(CustomElement* elem, QList<CustomElement*> listElem, QMultiMap<QString, CustomElement *> *multiMap){
 
-//14-11-2024//
+   int numCycles = elem->getCntTermEast(); /** Получим количество циклов по количеству OUT > 1 */
+   QString nameTerm = ""; /** Начальное значение цепочки для поиска элементов по OUT N */
+
+   for(int i=0; i<numCycles; i++){
+       nameTerm = getNameEast(elem, i);
+       int ii=0;
+   }
 }
 
+/**
+ * Получим имя выходного терминала
+ * @brief BuildElements::getEast
+ * @param elem
+ * @param idx
+ * @return
+ */
+QString BuildElements::getNameEast(CustomElement* elem, int idx){
+
+    int i = -1;
+    foreach (Terminal *term, elem->getListTerminals()) {
+        if(term->ori == Ulo::East){i++;}
+        if(term->ori == Ulo::East && idx == i){return term->getName();}
+    }
+    return "";
+}
 
 /**
  * Проверка элемента на несколько OUT
