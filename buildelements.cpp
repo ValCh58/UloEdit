@@ -1302,20 +1302,16 @@ void BuildElements::setElToMapForOutGreatOne(QList<CustomElement *> listElem){
         //2-если элемент с выходами OUT > 1 обработаем его
         //2.1-делаем цикл по выходам OUT
         //2.2-в каждой итерации ищем цепочку элементов
-        //2.3-вставляем в карту
-
-    QMultiMap<QString, CustomElement*> multiMap;
+        //2.3-вставляем в listElem координаты элемента
 
     for(int iList = 0; iList < listElem.size(); iList++){
         CustomElement *el = listElem.at(iList);
         if(isOutGreatOne(el)){ /** Перегруппировка последовательности элементов для каждого OUT */
-              multiMap.insert(el->getNameEl(), el);
-              makeChainForOut(el, listElem, &multiMap);
+           makeChainForOut(el);
         }else{ /** Запись элемента с одним OUT */
-              multiMap.insert(el->getNameEl(), el);
+              //multiMap.insert(el->getNameEl(), el);
         }
     }
-    int i=0;
 }
 
 /**
@@ -1324,15 +1320,29 @@ void BuildElements::setElToMapForOutGreatOne(QList<CustomElement *> listElem){
  * @param listElem
  * @param multiMap
  */
-void BuildElements::makeChainForOut(CustomElement* elem, QList<CustomElement*> listElem, QMultiMap<QString, CustomElement *> *multiMap){
+void BuildElements::makeChainForOut(CustomElement* elem){
 
    int numCycles = elem->getCntTermEast(); /** Получим количество циклов по количеству OUT > 1 */
    QString nameTerm = ""; /** Начальное значение цепочки для поиска элементов по OUT N */
 
    for(int i=0; i<numCycles; i++){
        nameTerm = getNameEast(elem, i);
-       int ii=0;
+       buildChainElements(nameTerm, elem);
    }
+}
+
+/**
+ * @brief BuildElements::buildChainElements
+ * @param numterm
+ * @param multiMap
+ */
+void BuildElements::buildChainElements(QString numterm, CustomElement* elem){
+     QString term = numterm;
+     int posElem = listElem.indexOf(elem);
+     for(int pos = posElem; pos < listElem.size(); pos++){
+         CustomElement *el = listElem.at(pos);
+         int test=0;
+     }
 }
 
 /**
