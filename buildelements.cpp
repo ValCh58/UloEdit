@@ -1277,7 +1277,7 @@ void BuildElements::calcPosElements()
        startPoint.setX(112.0);
        listElem.at(0)->setLocalPos(startPoint);
     }else if(listElem.size()>1 && isOutGreatOne(listElem)){/** Есть ли элементы с OUT > 1 */
-           setElToMapForOutGreatOne(listElem);
+             setElToMapForOutGreatOne(listElem);
 //         for(int iList = 0; iList < listElem.size(); iList++){ /** Больше одного элемента на схеме */
 //             p = setPointElem(listElem.at(iList));
 //             //p = setPointElemOutGreatOne(listElem.at(iList)); /** Установка начальных точек X,Y элементов для отрисовки их на схеме */
@@ -1303,13 +1303,18 @@ void BuildElements::setElToMapForOutGreatOne(QList<CustomElement *> listElem){
         //2.1-делаем цикл по выходам OUT
         //2.2-в каждой итерации ищем цепочку элементов
         //2.3-вставляем в listElem координаты элемента
+    QPointF p;
 
     for(int iList = 0; iList < listElem.size(); iList++){
         CustomElement *el = listElem.at(iList);
         if(isOutGreatOne(el)){ /** Перегруппировка последовательности элементов для каждого OUT */
            makeChainForOut(el);
         }else{ /** Запись элемента с одним OUT */
-              //multiMap.insert(el->getNameEl(), el);
+
+              p = setPointElem(el); /** Установка начальных точек X,Y элементов для отрисовки их на схеме */
+              p.setX(correctXY(p.x(),SchemeAlgo::xGrid));
+              p.setY(correctXY(p.y(),SchemeAlgo::yGrid));
+              el->setLocalPos(p);/** Позиция размещения элемента на схеме */
         }
     }
 }
@@ -1332,18 +1337,48 @@ void BuildElements::makeChainForOut(CustomElement* elem){
 }
 
 /**
+ * Построение связанных элементов
  * @brief BuildElements::buildChainElements
- * @param numterm
- * @param multiMap
+ * @param nameterm Начальный номер терминала OUT для цепочки
+ * @param elem
  */
-void BuildElements::buildChainElements(QString numterm, CustomElement* elem){
-     QString term = numterm;
+void BuildElements::buildChainElements(QString nameterm, CustomElement* elem){
+    /** Получим @param nameterm и будем собирать цепочку элементов из QList listElem */
+     QPointF p;
+     QString startTerm = nameterm; /** Начало цепочки |OUT|-->|INPUT| */
      int posElem = listElem.indexOf(elem);
      for(int pos = posElem; pos < listElem.size(); pos++){
          CustomElement *el = listElem.at(pos);
-         int test=0;
+         if(pos == 0){ startPoint.setX(112.0); el->setLocalPos(startPoint); continue; }/** Позиция первого элемента на схеме */
+         else{
+
+           startTerm = makeChain(startTerm, el);
+
+         p = setPointElem(el); /** Установка начальных точек X,Y элементов для отрисовки их на схеме */
+         p.setX(correctXY(p.x(),SchemeAlgo::xGrid));
+         p.setY(correctXY(p.y(),SchemeAlgo::yGrid));
+         el->setLocalPos(p);/** Позиция размещения элемента на схеме */
+         }
      }
 }
+
+
+QString BuildElements::makeChain(QString startTerm, CustomElement *el){
+    QString retNextNameTerm = "";
+    foreach(Terminal *t, el->getListTerminals()){
+        if(t->ori == Ulo::West && t->getName().indexOf(startTerm) == 0){ /** Нужен входной терминал */
+            foreach(Terminal *t, el->getListTerminals()){
+                if(t->ori == Ulo::East && t->getName().indexOf(startTerm) == 0){ /** Нужен выходной терминал */
+                    retNextNameTerm = t->getName();
+                    return retNextNameTerm;
+                }
+            }
+        }
+
+   }
+    return startTerm;;
+}
+
 
 /**
  * Получим имя выходного терминала

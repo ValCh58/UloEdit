@@ -42,7 +42,8 @@ private:
     bool isOutGreatOne(QList<CustomElement*> listElem);//11-11-2024
     bool isOutGreatOne(CustomElement* elem);//13-11-2024
     void makeChainForOut(CustomElement* elem);//18-11-2024
-    void buildChainElements(QString numterm, CustomElement* elem);//18-11-2024
+    void buildChainElements(QString nameterm, CustomElement* elem);//18-11-2024
+    QString makeChain(QString startTerm, CustomElement *el);
     QString getNameEast(CustomElement* elem, int idx);
     void testIntersectionPointWithLine(QPointF pf);//Анализ пересечения точки терминала с линией кондуктора//
     void typeLineCorrection1(int cntPoint);//Тип коррекции линий соединения №1.//
