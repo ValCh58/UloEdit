@@ -38,7 +38,7 @@ public:
 
 private:
 
-    void setElToMapForOutGreatOne(QList<CustomElement*> listElem);
+    void setSplitElForOutGreatOne(QList<CustomElement*> listElem);
     bool isOutGreatOne(QList<CustomElement*> listElem);//11-11-2024
     bool isOutGreatOne(CustomElement* elem);//13-11-2024
     void makeChainForOut(CustomElement* elem);//18-11-2024

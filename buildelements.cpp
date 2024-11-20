@@ -1,6 +1,7 @@
 #include "buildelements.h"
 
 #include <QPainter>
+#include <algorithm>
 
 #include "schemealgo.h"
 #include "ulodata.h"
@@ -1277,14 +1278,8 @@ void BuildElements::calcPosElements()
        startPoint.setX(112.0);
        listElem.at(0)->setLocalPos(startPoint);
     }else if(listElem.size()>1 && isOutGreatOne(listElem)){/** Есть ли элементы с OUT > 1 */
-             setElToMapForOutGreatOne(listElem);
-//         for(int iList = 0; iList < listElem.size(); iList++){ /** Больше одного элемента на схеме */
-//             p = setPointElem(listElem.at(iList));
-//             //p = setPointElemOutGreatOne(listElem.at(iList)); /** Установка начальных точек X,Y элементов для отрисовки их на схеме */
-//             p.setX(correctXY(p.x(),SchemeAlgo::xGrid)); /** Дополнительная коррекция точки Х */
-//             p.setY(correctXY(p.y(),SchemeAlgo::yGrid)); /** Дополнительная коррекция точки Y */
-//             listElem.at(iList)->setLocalPos(p);/** Позиция размещения элемента на схеме */
-//         }
+             setSplitElForOutGreatOne(listElem);
+
     }else{
           for(CustomElement *el:listElem){ /** Больше одного элемента на схеме */
               p = setPointElem(el); /** Установка начальных точек X,Y элементов для отрисовки их на схеме */
@@ -1296,21 +1291,23 @@ void BuildElements::calcPosElements()
 
 }
 
-void BuildElements::setElToMapForOutGreatOne(QList<CustomElement *> listElem){
+/**
+ * @brief BuildElements::setSplitElForOutGreatOne
+ * @param listElem
+ */
+void BuildElements::setSplitElForOutGreatOne(QList<CustomElement *> listElem){
         //0-цикл по элементам списка
-        //1-если элемент с одним OUT то вставляем его в карту
+        //1-если элемент с одним OUT то присвоим ему координату
         //2-если элемент с выходами OUT > 1 обработаем его
         //2.1-делаем цикл по выходам OUT
         //2.2-в каждой итерации ищем цепочку элементов
         //2.3-вставляем в listElem координаты элемента
     QPointF p;
 
-    for(int iList = 0; iList < listElem.size(); iList++){
-        CustomElement *el = listElem.at(iList);
-        if(isOutGreatOne(el)){ /** Перегруппировка последовательности элементов для каждого OUT */
+    for(CustomElement *el : listElem){
+        if(isOutGreatOne(el)){ /** Проверка элемента на несколько OUT */
            makeChainForOut(el);
         }else{ /** Запись элемента с одним OUT */
-
               p = setPointElem(el); /** Установка начальных точек X,Y элементов для отрисовки их на схеме */
               p.setX(correctXY(p.x(),SchemeAlgo::xGrid));
               p.setY(correctXY(p.y(),SchemeAlgo::yGrid));
@@ -1329,7 +1326,8 @@ void BuildElements::makeChainForOut(CustomElement* elem){
 
    int numCycles = elem->getCntTermEast(); /** Получим количество циклов по количеству OUT > 1 */
    QString nameTerm = ""; /** Начальное значение цепочки для поиска элементов по OUT N */
-
+   int py[numCycles];
+   std::sort(std::begin(py), std::end(py));
    for(int i=0; i<numCycles; i++){
        nameTerm = getNameEast(elem, i);
        buildChainElements(nameTerm, elem);
@@ -1345,17 +1343,19 @@ void BuildElements::makeChainForOut(CustomElement* elem){
 void BuildElements::buildChainElements(QString nameterm, CustomElement* elem){
     /** Получим @param nameterm и будем собирать цепочку элементов из QList listElem */
      QPointF p;
-     QString startTerm = nameterm; /** Начало цепочки |OUT|-->|INPUT| */
+     QString startTerm = nameterm, isTerm = ""; /** Начало цепочки |OUT|-->|INPUT| */
      int posElem = listElem.indexOf(elem);
      for(int pos = posElem; pos < listElem.size(); pos++){
          CustomElement *el = listElem.at(pos);
          if(pos == 0){ startPoint.setX(112.0); el->setLocalPos(startPoint); continue; }/** Позиция первого элемента на схеме */
          else{
 
-           startTerm = makeChain(startTerm, el);
-
+             isTerm = makeChain(startTerm, el);
+             if(startTerm == isTerm && el->getTypeEl()!=TMR){ continue; }else{ startTerm = isTerm; }
+              //Если встречается элемент с OUT > 1 что делать ???
          p = setPointElem(el); /** Установка начальных точек X,Y элементов для отрисовки их на схеме */
          p.setX(correctXY(p.x(),SchemeAlgo::xGrid));
+
          p.setY(correctXY(p.y(),SchemeAlgo::yGrid));
          el->setLocalPos(p);/** Позиция размещения элемента на схеме */
          }
@@ -1367,16 +1367,15 @@ QString BuildElements::makeChain(QString startTerm, CustomElement *el){
     QString retNextNameTerm = "";
     foreach(Terminal *t, el->getListTerminals()){
         if(t->ori == Ulo::West && t->getName().indexOf(startTerm) == 0){ /** Нужен входной терминал */
-            foreach(Terminal *t, el->getListTerminals()){
-                if(t->ori == Ulo::East && t->getName().indexOf(startTerm) == 0){ /** Нужен выходной терминал */
-                    retNextNameTerm = t->getName();
+            foreach(Terminal *t1, el->getListTerminals()){
+                if(t1->ori == Ulo::East && el->getCntTermEast() == 1){ /** Нужен выходной терминал этого же элемента с одним выходом! */
+                    retNextNameTerm = t1->getName();
                     return retNextNameTerm;
                 }
             }
         }
-
    }
-    return startTerm;;
+    return startTerm;
 }
 
 
