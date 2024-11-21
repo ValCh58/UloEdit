@@ -43,6 +43,7 @@ private:
     bool isOutGreatOne(CustomElement* elem);//13-11-2024
     void makeChainForOut(CustomElement* elem);//18-11-2024
     void buildChainElements(QString nameterm, CustomElement* elem);//18-11-2024
+    QPointF setLayout2(CustomElement *el);
     QString makeChain(QString startTerm, CustomElement *el);
     QString getNameEast(CustomElement* elem, int idx);
     void testIntersectionPointWithLine(QPointF pf);//Анализ пересечения точки терминала с линией кондуктора//

@@ -33,7 +33,7 @@ BuildElements::BuildElements(SchemeAlgo *scheme, QMap<int, QMap<int, UloData> > 
     ulodata = mapElem;
     paper = scene->border_and_titleblock.insideBorderRect();//размер области рисования схемы//
     indentEdge = 64;//60;//Отступ от края элемента по всему пиремeтру//
-    startPoint.setX(-96);//-95);//(105);
+    startPoint.setX(112);//-96);//(105);
     startPoint.setY(80);
     tmpPoint = startPoint;
     tmpDeltaY = 0;
@@ -1318,6 +1318,7 @@ void BuildElements::setSplitElForOutGreatOne(QList<CustomElement *> listElem){
 
 /**
  * @brief BuildElements::makeChainForOut
+ * имеет внешний цикл в котором вызывается
  * @param elem
  * @param listElem
  * @param multiMap
@@ -1326,8 +1327,9 @@ void BuildElements::makeChainForOut(CustomElement* elem){
 
    int numCycles = elem->getCntTermEast(); /** Получим количество циклов по количеству OUT > 1 */
    QString nameTerm = ""; /** Начальное значение цепочки для поиска элементов по OUT N */
-   int py[numCycles];
-   std::sort(std::begin(py), std::end(py));
+   //QList<qreal> P2y;   //На этапе создания координаты (0,0)
+   //for(Terminal *t : elem->getListTerminals()){if(t->ori == Ulo::East) P2y << t->getP2().ry();}
+   //std::sort(std::begin(P2y), std::end(P2y));
    for(int i=0; i<numCycles; i++){
        nameTerm = getNameEast(elem, i);
        buildChainElements(nameTerm, elem);
@@ -1347,16 +1349,17 @@ void BuildElements::buildChainElements(QString nameterm, CustomElement* elem){
      int posElem = listElem.indexOf(elem);
      for(int pos = posElem; pos < listElem.size(); pos++){
          CustomElement *el = listElem.at(pos);
-         if(pos == 0){ startPoint.setX(112.0); el->setLocalPos(startPoint); continue; }/** Позиция первого элемента на схеме */
+         if(pos == 0){ /*startPoint.setX(112.0); tmpPoint = startPoint;*/ el->setLocalPos(startPoint); continue; }/** Позиция первого элемента на схеме */
          else{
 
              isTerm = makeChain(startTerm, el);
              if(startTerm == isTerm && el->getTypeEl()!=TMR){ continue; }else{ startTerm = isTerm; }
               //Если встречается элемент с OUT > 1 что делать ???
-         p = setPointElem(el); /** Установка начальных точек X,Y элементов для отрисовки их на схеме */
-         p.setX(correctXY(p.x(),SchemeAlgo::xGrid));
 
-         p.setY(correctXY(p.y(),SchemeAlgo::yGrid));
+         p = setLayout2(el); /** Установка точек X,Y элементов для отрисовки их на схеме */
+
+         //p.setX(correctXY(p.x(),SchemeAlgo::xGrid));
+         //p.setY(correctXY(p.y(),SchemeAlgo::yGrid));
          el->setLocalPos(p);/** Позиция размещения элемента на схеме */
          }
      }
@@ -1434,7 +1437,54 @@ QPointF BuildElements::setPointElem(CustomElement *el)
 }
 
 /**
- * Установка начальных точек X,Y элементов для отрисовки их на схеме
+ * Установка точек X,Y элементов для отрисовки их на схеме
+ * @brief BuildElements::setLayout2
+ * @param el
+ * @return
+ */
+QPointF BuildElements::setLayout2(CustomElement *el)
+{
+    QPointF retVal;
+    QSizeF locSize = el->getSizeElem();
+    qreal dX = 0.0;
+    //retVal = tmpPoint;
+
+    /** Отслеживание макс высоты элемента */
+    if(tmpDeltaY < locSize.height()){
+       tmpDeltaY = locSize.height();
+    }
+
+    isCoordMove(locSize.width());
+
+    if(el->getTypeEl() == UNI_TG && getNumCellTg(el, 2) == IN_R){
+        el->setLocalPos(tmpPoint);/** Установим позицию триггера(х,у) */
+        if(!isCorrectEl(el)){
+           /** При переносе (х,у)=(105,220) */
+           int cntEl=0;/** All Elem */
+           int cntRev=0;/** INP S */
+           int cnt3=0;/** INP R */
+           dX = getCoordYForElemTg(el, &cnt3);
+           if(el->getTypeEl() == UNI_TG && getNumCellTg(el, 1) == IN_S){/** Изменим координату Х элемента */
+              getCoordXForElemTg(el, dX, &cntEl, &cntRev);
+              /** Коррекция элементов после сдвига по первой ячейке */
+              cnt3 = cnt3 > cntRev ? cntRev : cnt3;
+              correctElements(el, cntEl, cnt3);
+           }
+           tmpPoint.setX(el->getLocalPos().x());
+        }
+    }
+
+    tmpPoint.setX(correctXY(tmpPoint.x(), SchemeAlgo::xGrid));
+    tmpPoint.setY(correctXY(tmpPoint.y(), SchemeAlgo::yGrid));
+
+    retVal = tmpPoint;
+
+    return retVal;
+}
+
+
+/**
+ * Установка точек X,Y элементов для отрисовки их на схеме
  * @brief BuildElements::setLayout1
  * @param el
  * @return
@@ -1487,9 +1537,10 @@ QPointF BuildElements::setLayout1(CustomElement *el)
 bool BuildElements::isCoordMove(qreal width)
 {
     bool ret=false;
+    qreal Px = tmpPoint.x()+width+Terminal::termLen*2+indentEdge*2;
 
-    if(tmpPoint.x()+width+Terminal::termLen*2+indentEdge*2 < paper.width()){
-       tmpPoint.setX(tmpPoint.x()+Terminal::termLen*2+indentEdge*2);/** По умолчанию последовательное размещение */
+    if(Px < paper.width()){
+       tmpPoint.setX(Px);/** По умолчанию последовательное размещение */
     }else{ /** Перенос на одну позицию элементов по У вниз */
         startPoint.setX(112.0);
         tmpPoint.setX(startPoint.x());
