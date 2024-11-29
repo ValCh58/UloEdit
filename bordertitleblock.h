@@ -44,31 +44,30 @@ class BorderTitleBlock : public QObject
 		void draw(QPainter *painter);
 		void drawDxf(int, int, bool, QString &, int);
 	
-		//METHODS TO GET DIMENSION
-		//COLUMNS
-			/// @return the number of columns
+        /** *****METHODS TO GET DIMENSION COLUMNS***** */
+            /** @return the number of columns */
 		int   columnsCount() const { return(columns_count_); }
-			/// @return the columns width, in pixels
+            /** @return the columns width, in pixels */
 		qreal columnsWidth() const { return(columns_width_); }
-			/// @return the total width of all columns, headers excluded
+            /** @return the total width of all columns, headers excluded */
 		qreal columnsTotalWidth() const { return(columns_count_ * columns_width_); }
-			/// @return the column headers height, in pixels
+            /** @return the column headers height, in pixels */
 		qreal columnsHeaderHeight() const { return(columns_header_height_); }
 	
-		//ROWS
-			/// @return the number of rows
+        /** *****METHODS TO GET DIMENSION ROWS***** */
+            /** @return the number of rows */
 		int rowsCount() const { return(rows_count_); }
-			/// @return the rows height, in pixels
+            /** @return the rows height, in pixels */
 		qreal rowsHeight() const { return(rows_height_); }
-			/// @return the total height of all rows, headers excluded
+            /** @return the total height of all rows, headers excluded */
 		qreal rowsTotalHeight() const { return(rows_count_ * rows_height_); }
-			/// @return la rows header width, in pixels
+            /** @return la rows header width, in pixels */
 		qreal rowsHeaderWidth() const { return(rows_header_width_); }
 	
 		// border - title block = diagram
-			/// @return the diagram width, i.e. the width of the border without title block
+            /** @return the diagram width, i.e. the width of the border without title block */
 		qreal diagramWidth() const { return(columnsTotalWidth() + rowsHeaderWidth()); }
-			/// @return the diagram height, i.e. the height of the border without title block
+            /** @return the diagram height, i.e. the height of the border without title block */
 		qreal diagramHeight() const { return(rowsTotalHeight() + columnsHeaderHeight()); }
 
 
@@ -82,17 +81,17 @@ class BorderTitleBlock : public QObject
 		QRectF insideBorderRect() const;
 	
 
-	// methods to get display options
-	/// @return true si le cartouche est affiche, false sinon
+    /** *****methods to get display options***** */
+    /** @return true si le cartouche est affiche, false sinon */
 	bool titleBlockIsDisplayed() const { return(display_titleblock_); }
-	/// @return true si les entetes des colonnes sont affiches, false sinon
+    /** @return true si les entetes des colonnes sont affiches, false sinon */
 	bool columnsAreDisplayed() const { return(display_columns_); }
-	/// @return true si les entetes des lignes sont affiches, false sinon
+    /** @return true si les entetes des lignes sont affiches, false sinon */
 	bool rowsAreDisplayed() const { return(display_rows_); }
-	/// @return true si la bordure est affichee, false sinon
+    /** @return true si la bordure est affichee, false sinon */
 	bool borderIsDisplayed() const { return(display_border_); }
 	
-	// methods to set dimensions
+    /** *****methods to set dimensions***** */
 	void setColumnsCount(int);
 	void setRowsCount(int);
 	void setColumnsWidth(const qreal &);
@@ -104,7 +103,7 @@ class BorderTitleBlock : public QObject
 
 	public slots:
 
-	// methods to set display options
+    /** *****methods to set display options***** */
 	void displayTitleBlock(bool);
 	void displayColumns(bool);
 	void displayRows(bool);

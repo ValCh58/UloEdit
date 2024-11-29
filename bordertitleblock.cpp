@@ -115,7 +115,7 @@ QRectF BorderTitleBlock::insideBorderRect() const
 
 
 /**
-	@param di true pour afficher le cartouche, false sinon
+    @param di true pour afficher le cartouche, false sinon (di true для отображения основной надписи, в противном случае — false)
 */
 void BorderTitleBlock::displayTitleBlock(bool di) {
 	bool change = (di != display_titleblock_);
@@ -124,7 +124,7 @@ void BorderTitleBlock::displayTitleBlock(bool di) {
 }
 
 /**
-	@param dc true pour afficher les entetes des colonnes, false sinon
+    @param dc true pour afficher les entetes des colonnes, false sinon (dc true для отображения заголовков столбцов, в противном случае — false)
 */
 void BorderTitleBlock::displayColumns(bool dc) {
 	bool change = (dc != display_columns_);
@@ -133,7 +133,7 @@ void BorderTitleBlock::displayColumns(bool dc) {
 }
 
 /**
-	@param dr true pour afficher les entetes des lignes, false sinon
+    @param dr true pour afficher les entetes des lignes, false sinon (dr true для отображения заголовков строк, в противном случае — false)
 */
 void BorderTitleBlock::displayRows(bool dr) {
 	bool change = (dr != display_rows_);
@@ -142,9 +142,9 @@ void BorderTitleBlock::displayRows(bool dr) {
 }
 
 /**
-	@param db true pour afficher la bordure du schema, false sinon
-	Note : si l'affichage de la bordure est ainsi desactivee, les lignes et
-	colonnes ne seront pas dessinees.
+    @param db true pour afficher la bordure du schema, false sinon (db true для отображения границы схемы, в противном случае false)
+    Note : si l'affichage de la bordure est ainsi desactivee, les lignes et (если отображение границы таким образом деактивировано, линии и)
+    colonnes ne seront pas dessinees. (столбцы не будут нарисованы.)
 */
 void BorderTitleBlock::displayBorder(bool db) {
 	bool change = (db != display_border_);
@@ -227,9 +227,9 @@ void BorderTitleBlock::draw(QPainter *painter)
 }// -----------------------------------------------------------------------------------------------------------
 
 /**
-	Permet de changer le nombre de colonnes.
+    Permet de changer le nombre de colonnes.(Позволяет изменить количество столбцов.)
 	Si ce nombre de colonnes est inferieur au minimum requis, c'est ce minimum
-	qui est utilise.
+    qui est utilise. (Если это количество столбцов меньше минимально необходимого, именно этот минимум который используется.)
 	@param nb_c nouveau nombre de colonnes
 	@see minNbColumns()
 */
@@ -242,7 +242,9 @@ void BorderTitleBlock::setColumnsCount(int nb_c) {
 /**
 	Change la largeur des colonnes.
 	Si la largeur indiquee est inferieure au minimum requis, c'est ce minimum
-	qui est utilise.
+    qui est utilise. (Изменяет ширину столбцов.
+    Если указанная ширина меньше требуемого минимума, этот минимум
+    который используется.)
 	@param new_cw nouvelle largeur des colonnes
 	@see minColumnsWidth()
 */
@@ -254,7 +256,8 @@ void BorderTitleBlock::setColumnsWidth(const qreal &new_cw) {
 
 /**
 	Change la hauteur des en-tetes contenant les numeros de colonnes. Celle-ci
-	doit rester comprise entre 5 et 50 px.
+    doit rester comprise entre 5 et 50 px.(Изменяет высоту заголовков, содержащих номера столбцов. Вот этот
+    должен оставаться в пределах от 5 до 50 пикселей.)
 	@param new_chh nouvelle hauteur des en-tetes de colonnes
 */
 void BorderTitleBlock::setColumnsHeaderHeight(const qreal &new_chh) {
@@ -265,7 +268,9 @@ void BorderTitleBlock::setColumnsHeaderHeight(const qreal &new_chh) {
 /**
 	Permet de changer le nombre de lignes.
 	Si ce nombre de lignes est inferieur au minimum requis, cette fonction ne
-	fait rien
+    fait rien (Позволяет изменить количество строк.
+    Если это количество строк меньше минимально необходимого, эта функция не будет работать.
+    ничего не делает)
 	@param nb_r nouveau nombre de lignes
 	@see minNbRows()
 */
@@ -278,7 +283,9 @@ void BorderTitleBlock::setRowsCount(int nb_r) {
 /**
 	Change la hauteur des lignes.
 	Si la hauteur indiquee est inferieure au minimum requis, c'est ce minimum
-	qui est utilise.
+    qui est utilise.(Изменяет высоту строк.
+    Если указанная высота меньше требуемого минимума, этот минимум
+    который используется.)
 	@param new_rh nouvelle hauteur des lignes
 	@see minRowsHeight()
 */
@@ -290,7 +297,8 @@ void BorderTitleBlock::setRowsHeight(const qreal &new_rh) {
 
 /**
 	Change la largeur des en-tetes contenant les numeros de lignes. Celle-ci
-	doit rester comprise entre 5 et 50 px.
+    doit rester comprise entre 5 et 50 px.(Изменяет ширину заголовков, содержащих номера строк. Вот этот
+    должен оставаться в пределах от 5 до 50 пикселей.)
 	@param new_rhw nouvelle largeur des en-tetes des lignes
 */
 void BorderTitleBlock::setRowsHeaderWidth(const qreal &new_rhw) {
@@ -300,7 +308,8 @@ void BorderTitleBlock::setRowsHeaderWidth(const qreal &new_rhw) {
 
 /**
 	Cette methode essaye de se rapprocher le plus possible de la hauteur donnee
-	en parametre en modifiant le nombre de lignes en cours.
+    en parametre en modifiant le nombre de lignes en cours.(Этот метод пытается максимально приблизиться к заданной высоте.
+    in параметр, изменяя количество текущих строк.)
 */
 void BorderTitleBlock::setDiagramHeight(const qreal &height) {
 	// taille des lignes a utiliser = rows_height

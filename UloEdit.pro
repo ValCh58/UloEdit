@@ -6,7 +6,9 @@
 
 QT       += core gui widgets
 
-CONFIG += c++14
+CONFIG += c++14 \
+          debug
+
 greaterThan(QT_MAJOR_VERSION, 4):
 TARGET = UloEditDiagram
 TEMPLATE = app
@@ -47,7 +49,8 @@ SOURCES += main.cpp \
     unielement_f9.cpp \
     unielement_99.cpp \
     unielement_41.cpp \
-    bvrelement.cpp
+    bvrelement.cpp \
+    cellgrid.cpp
 
 HEADERS  += mainwindow.h \
     child.h \
@@ -85,7 +88,8 @@ HEADERS  += mainwindow.h \
     unielement_f9.h \
     unielement_99.h \
     unielement_41.h \
-    bvrelement.h
+    bvrelement.h \
+    cellgrid.h
 
 
 

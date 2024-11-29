@@ -33,10 +33,11 @@ BuildElements::BuildElements(SchemeAlgo *scheme, QMap<int, QMap<int, UloData> > 
     ulodata = mapElem;
     paper = scene->border_and_titleblock.insideBorderRect();//размер области рисования схемы//
     indentEdge = 64;//60;//Отступ от края элемента по всему пиремeтру//
-    startPoint.setX(112);//-96);//(105);
+    startPoint.setX(-95);//-96);//(105);
     startPoint.setY(80);
     tmpPoint = startPoint;
     tmpDeltaY = 0;
+
 
 }
 
@@ -1277,10 +1278,11 @@ void BuildElements::calcPosElements()
     }else if(listElem.size()==1){ /** Один элемент на схеме */
        startPoint.setX(112.0);
        listElem.at(0)->setLocalPos(startPoint);
-    }else if(listElem.size()>1 && isOutGreatOne(listElem)){/** Есть ли элементы с OUT > 1 */
-             setSplitElForOutGreatOne(listElem);
+    }//else if(listElem.size()>1 && isOutGreatOne(listElem)){/** Есть ли элементы с OUT > 1 */
+     //        setSplitElForOutGreatOne(listElem);*/
 
-    }else{
+//    }
+      else{
           for(CustomElement *el:listElem){ /** Больше одного элемента на схеме */
               p = setPointElem(el); /** Установка начальных точек X,Y элементов для отрисовки их на схеме */
               p.setX(correctXY(p.x(),SchemeAlgo::xGrid));
@@ -1307,12 +1309,12 @@ void BuildElements::setSplitElForOutGreatOne(QList<CustomElement *> listElem){
     for(CustomElement *el : listElem){
         if(isOutGreatOne(el)){ /** Проверка элемента на несколько OUT */
            makeChainForOut(el);
-        }else{ /** Запись элемента с одним OUT */
-              p = setPointElem(el); /** Установка начальных точек X,Y элементов для отрисовки их на схеме */
-              p.setX(correctXY(p.x(),SchemeAlgo::xGrid));
-              p.setY(correctXY(p.y(),SchemeAlgo::yGrid));
-              el->setLocalPos(p);/** Позиция размещения элемента на схеме */
-        }
+        }//else{ /** Запись элемента с одним OUT */
+         //     p = setPointElem(el); /** Установка начальных точек X,Y элементов для отрисовки их на схеме */
+         //     p.setX(correctXY(p.x(),SchemeAlgo::xGrid));
+         //     p.setY(correctXY(p.y(),SchemeAlgo::yGrid));
+         //     el->setLocalPos(p);/** Позиция размещения элемента на схеме */
+         //}
     }
 }
 
@@ -1357,9 +1359,6 @@ void BuildElements::buildChainElements(QString nameterm, CustomElement* elem){
               //Если встречается элемент с OUT > 1 что делать ???
 
          p = setLayout2(el); /** Установка точек X,Y элементов для отрисовки их на схеме */
-
-         //p.setX(correctXY(p.x(),SchemeAlgo::xGrid));
-         //p.setY(correctXY(p.y(),SchemeAlgo::yGrid));
          el->setLocalPos(p);/** Позиция размещения элемента на схеме */
          }
      }
@@ -1449,7 +1448,7 @@ QPointF BuildElements::setLayout2(CustomElement *el)
     qreal dX = 0.0;
     //retVal = tmpPoint;
 
-    /** Отслеживание макс высоты элемента */
+    /** Отслеживание макс высоты элемента, locSize - размер элемента */
     if(tmpDeltaY < locSize.height()){
        tmpDeltaY = locSize.height();
     }

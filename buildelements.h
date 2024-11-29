@@ -21,6 +21,7 @@ class TmrElement;
 class BorderTitleBlock;
 class Conductor;
 class PointItem;
+class CellGrid;
 
 
 class BuildElements
@@ -32,9 +33,10 @@ public:
     void greateElements();
     void paintElements();
     QPolygon points;
-
     QString correctNameEl(QString strNameEl);
 
+    /** Сетка для размещения элементов на схеме */
+    CellGrid grid[11][5]; //29-11-2024
 
 private:
 

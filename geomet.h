@@ -9,7 +9,7 @@ class Geomet
 {
 public:
     Geomet();
-    ~Geomet();
+    virtual ~Geomet();
 
     Q_ENUMS(OrientPoint)
     enum OrientPoint {LEFT, RIGHT, BEYOND, BEHIND, BETWEEN, ORIGIN, DESTINATION};
